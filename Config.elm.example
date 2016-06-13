@@ -1,0 +1,4 @@
+module Config exposing (key)
+
+key : String
+key = "insert key here"
