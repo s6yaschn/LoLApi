@@ -1,4 +1,4 @@
-module Region exposing (Endpoint, region, platformID, host, global)
+module Region exposing (Endpoint, region, platformID, host, global, br, eune, euw)
 
 type Endpoint = Endpoint
     { region: String
@@ -18,7 +18,28 @@ host (Endpoint x) = x.host
 
 global: Endpoint
 global = Endpoint 
-    { region = "Global"
+    { region = "global"
     , platformID = ""
     , host = "global.api.pvp.net"
+    }
+
+br : Endpoint
+br = Endpoint 
+    { region = "br"
+    , platformID = "br1"
+    , host = "br.api.pvp.net"
+    }
+
+eune : Endpoint
+eune = Endpoint 
+    { region = "eune"
+    , platformID = "eun1"
+    , host = "eune.api.pvp.net"
+    }
+
+euw : Endpoint
+euw = Endpoint
+    { region = "euw"
+    , platformID = "euw1"
+    , host = "euw.api.pvp.net"
     }

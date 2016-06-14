@@ -1,8 +1,20 @@
 module Core exposing (..)
 
 import Json.Decode exposing (..)
+import Dict exposing (Dict)
+import Task exposing (Task)
+import Http
 
 -- TYPES
+type alias Request a = Task Http.Error a
+type alias ChampionList =
+    { data: Dict String Champion
+    , format: String
+    , keys: Dict String String
+    , typ: String -- originally type
+    , version: String
+    }
+
 
 type alias Champion =
     { allytips: List String
@@ -168,17 +180,17 @@ block : Decoder Block
 block =
     Block
     <$> "items" := list blockItem
-    <+> "recMath" := bool
-    <+> "type" := string
+    <+> oneOf ["recMath" := bool, succeed False] -- optional
+    <+> oneOf ["type" := string, succeed ""] -- optional
 
 spellVars : Decoder SpellVars
 spellVars = 
     SpellVars
     <$> "coeff" := list float
-    <+> "dyn" := string
+    <+> oneOf ["dyn" := string, succeed ""] -- optional
     <+> "key" := string
     <+> "link" := string
-    <+> "ranksWith" := string
+    <+> oneOf ["ranksWith" := string, succeed ""] -- optional
 
 
 levelTip : Decoder LevelTip
@@ -228,7 +240,7 @@ recommended =
     <+> "champion" := string
     <+> "map" := string
     <+> "mode" := string
-    <+> "priority" := bool
+    <+>  oneOf ["priority" := bool, succeed False] -- not always included, default to False
     <+> "title" := string
     <+> "type" := string
 
@@ -266,27 +278,27 @@ image =
 championSpell : Decoder ChampionSpell
 championSpell =
     ChampionSpell
-    <$> "altimages" := list image
+    <$> oneOf ["altimages" := list image, succeed []] -- optional
     <+> "cooldown" := list float
     <+> "cooldownBurn" := string
     <+> "cost" := list int
     <+> "costBurn" := string
     <+> "costType" := string
     <+> "description" := string
-    <+> "effect" := list (list float)
+    <+> "effect" := list (oneOf [null [-1], (list float)])  -- 1-indexed arrays, ignore the first null and insert -1
     <+> "effectBurn" := list string
     <+> "image" := image
     <+> "key" := string
     <+> "leveltip" := levelTip
     <+> "maxrank" := int
     <+> "name" := string
-    <+> "range" := (oneOf [Err <$> string, Ok <$> list int])
+    <+> "range" := oneOf [Err <$> string, Ok <$> list int]
     <+> "rangeBurn" := string
-    <+> "resource" := string
+    <+> oneOf ["resource" := string, succeed ""] -- optional
     <+> "sanitizedDescription" := string
     <+> "sanitizedTooltip" := string
     <+> "tooltip" := string
-    <+> "vars" := list spellVars
+    <+> oneOf ["vars" := list spellVars, succeed []] -- optional
 
 
 champion : Decoder Champion
@@ -309,3 +321,13 @@ champion =
     <+> "stats" := stats
     <+> "tags" := list string 
     <+> "title" := string
+
+
+championList : Decoder ChampionList
+championList = 
+    ChampionList
+    <$> "data" := dict champion
+    <+> "format" := string 
+    <+> "keys" := dict string 
+    <+> "type" := string 
+    <+> "version" := string 
