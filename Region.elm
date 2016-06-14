@@ -1,4 +1,4 @@
-module Region exposing (Endpoint, region, platformID)
+module Region exposing (Endpoint, region, platformID, host, global)
 
 type Endpoint = Endpoint
     { region: String
