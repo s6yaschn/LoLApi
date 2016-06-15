@@ -19,7 +19,7 @@ main =
         }
 
 
--- MODEL
+-- MODEL 
 
 type alias Model =
    Champion
@@ -57,7 +57,7 @@ subscriptions model =
 
 splashArt : Model -> Html Msg
 splashArt model =
-    img [src <| "http://ddragon.leagueoflegends.com/cdn/img/champion/splash/" ++ model.key ++ "_0.jpg", alt model.name] []
+    img [src <| ddragon ++ "/img/champion/splash/" ++ model.key ++ "_0.jpg", alt model.name] []
 
 
 
@@ -67,7 +67,7 @@ skinSplashArt id model =
     let 
         valid = validSkin id model
     in 
-        img [ src <| "http://ddragon.leagueoflegends.com/cdn/img/champion/splash/" 
+        img [ src <| ddragon ++ "/img/champion/splash/" 
                 ++ model.key ++ "_" 
                 ++ (if valid then toString id else "0")
                 ++ ".jpg"
@@ -76,7 +76,7 @@ skinSplashArt id model =
 
 loadingScreen : Model -> Html Msg
 loadingScreen model =
-    img [src <| "http://ddragon.leagueoflegends.com/cdn/img/champion/loading/" ++ model.key ++ "_0.jpg", alt model.name] []
+    img [src <| ddragon ++ "/img/champion/loading/" ++ model.key ++ "_0.jpg", alt model.name] []
 
 
 skinLoadingScreen : Int -> Model -> Html Msg
@@ -84,7 +84,7 @@ skinLoadingScreen id model =
     let
         valid = validSkin id model
     in
-        img [ src <| "http://ddragon.leagueoflegends.com/cdn/img/champion/loading/"
+        img [ src <| ddragon ++ "/img/champion/loading/"
                 ++ model.key ++ "_"
                 ++ (if valid then toString id else "0")
                 ++ ".jpg"

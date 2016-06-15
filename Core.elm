@@ -158,6 +158,25 @@ type alias BlockItem =
     , id: Int
     }
 
+
+type alias Realm =
+    { cdn: String
+    , css: String
+    , dd: String
+    , l: String
+    , lg: String
+    , n: Dict String String
+    , profileiconmax: Int
+    , store: String
+    , v: String
+    }
+
+ 
+-- CONSTANTS
+
+ddragon : String
+ddragon = "http://ddragon.leagueoflegends.com/cdn"
+
 -- for testing:
 
 emptyImage: Image
@@ -349,3 +368,18 @@ championList =
     <+> "keys" := dict string 
     <+> "type" := string 
     <+> "version" := string 
+
+
+realm: Decoder Realm
+realm =
+    Realm
+    <$> "cdn" := string 
+    <+> "css" := string 
+    <+> "dd" := string 
+    <+> "l" := string 
+    <+> "lg" := string 
+    <+> "n" := dict string 
+    <+> "profileiconmax" := int 
+    <+> oneOf ["store" := string, succeed ""] -- optional 
+    <+> "v" := string
+    

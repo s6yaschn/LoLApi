@@ -37,11 +37,10 @@ getAllChampions endpoint =
 getChampionById : Region.Endpoint -> Int -> Request Champion 
 getChampionById endpoint id =
     request endpoint ("champion/" ++ toString id ++ "?champData=all") champion
- 
-getCdnUrl : Region.Endpoint -> Request String 
-getCdnUrl endpoint =
-    request endpoint "realm" ("cdn" := Json.string ) 
 
+getRealm : Region.Endpoint -> Request Realm
+getRealm endpoint =
+    request endpoint "realm" realm
 
 
 -- HTTP
