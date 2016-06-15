@@ -1,6 +1,6 @@
 module Static exposing (..)
 
-import Json.Decode as Json
+import Json.Decode as Json exposing ((:=))
 import Region
 import Http
 import Html
@@ -8,11 +8,12 @@ import Html.App
 import Task
 import Config exposing (key)
 import Core exposing (..)
+import String exposing (contains)
 
 import Debug exposing (log)
 
 main = Html.App.program
-    { init = ("", Task.perform toString toString (getAllChampions Region.euw))
+    { init = ("", Task.perform toString (toString << .keys) (getAllChampions Region.euw))
     , view = Html.text
     , update = \x -> \y -> (x, Cmd.none)
     , subscriptions =\x -> Sub.none
@@ -37,6 +38,9 @@ getChampionById : Region.Endpoint -> Int -> Request Champion
 getChampionById endpoint id =
     request endpoint ("champion/" ++ toString id ++ "?champData=all") champion
  
+getCdnUrl : Region.Endpoint -> Request String 
+getCdnUrl endpoint =
+    request endpoint "realm" ("cdn" := Json.string ) 
 
 
 
@@ -50,6 +54,8 @@ request endpoint request decoder =
             ++ reg ++ "/"
             ++ version ++ "/"
             ++ request
-            ++ "&api_key=" ++ key       
+            ++ if contains "?" request
+                then "&api_key=" ++ key
+                else "?api_key=" ++ key       
     in
         Http.get decoder (log url url)

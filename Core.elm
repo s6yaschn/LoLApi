@@ -158,6 +158,24 @@ type alias BlockItem =
     , id: Int
     }
 
+-- for testing:
+
+emptyImage: Image
+emptyImage = Image "" "" 0 "" 0 0 0
+
+emptyInfo : Info
+emptyInfo = Info 0 0 0 0
+
+emptyPassive : Passive
+emptyPassive = Passive "" emptyImage "" ""
+
+emptyStats: Stats
+emptyStats = Stats 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+emptyChampion : Champion
+emptyChampion = 
+    Champion [] "" [] 34 emptyImage emptyInfo "" "" "" "" emptyPassive [] [] [] emptyStats [] ""
+
 -- for convenience:
 
 infixl 4 <$>
