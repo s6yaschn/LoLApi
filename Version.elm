@@ -1,4 +1,4 @@
-module Version exposing (init, Msg, update, getVersion )
+module Version exposing (Model, init, Msg, update, getVersion, testVersion)
 
 import Task
 import Static
@@ -13,6 +13,11 @@ main = Html.App.program
   , subscriptions = subscriptions
   , view = view
   }
+
+-- testing
+testVersion : Model
+testVersion = {version = "6.11.1"}
+
 
 -- MODEL
 

@@ -32,21 +32,21 @@ version = "v1.2"
 
 getAllChampions : Region.Endpoint -> Request ChampionList
 getAllChampions endpoint =
-    request endpoint "champion?champData=all" championList
+    request endpoint championList "champion?champData=all" 
 
 getChampionById : Region.Endpoint -> Int -> Request Champion 
 getChampionById endpoint id =
-    request endpoint ("champion/" ++ toString id ++ "?champData=all") champion
+    request endpoint champion <| "champion/" ++ toString id ++ "?champData=all" 
 
 getRealm : Region.Endpoint -> Request Realm
 getRealm endpoint =
-    request endpoint "realm" realm
+    request endpoint realm "realm"
 
 
 -- HTTP
 
-request: Region.Endpoint -> String -> Json.Decoder a -> Request a
-request endpoint request decoder = 
+request: Region.Endpoint -> Json.Decoder a -> String -> Request a
+request endpoint decoder request = 
     let
         reg = Region.region endpoint
         url = "https://global.api.pvp.net/api/lol/static-data/"
@@ -57,4 +57,4 @@ request endpoint request decoder =
                 then "&api_key=" ++ key
                 else "?api_key=" ++ key       
     in
-        Http.get decoder (log url url)
+        Http.get decoder (log url url) -- Debug
