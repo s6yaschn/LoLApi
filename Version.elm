@@ -16,7 +16,7 @@ main = Html.App.program
 
 -- testing
 testVersion : Model
-testVersion = {version = "6.11.1"}
+testVersion = {version = "6.12.1"}
 
 
 -- MODEL

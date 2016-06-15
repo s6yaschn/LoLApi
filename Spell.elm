@@ -1,4 +1,4 @@
-module ChampionSpell exposing (..)
+module Spell exposing (..)
 
 
 import Core exposing (ChampionSpell, ddragon, Image, emptySpell, emptyImage)

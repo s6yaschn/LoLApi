@@ -179,6 +179,9 @@ ddragon = "http://ddragon.leagueoflegends.com/cdn"
 
 -- for testing:
 
+emptyItem: BlockItem
+emptyItem = BlockItem 0 0
+
 emptySpell: ChampionSpell
 emptySpell = ChampionSpell [] [] "" [] "" "" "" [] [] emptyImage "" emptyLevelTip 0 "" (Err "") "" "" "" "" "" []
 
