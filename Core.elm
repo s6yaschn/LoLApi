@@ -179,6 +179,15 @@ ddragon = "http://ddragon.leagueoflegends.com/cdn"
 
 -- for testing:
 
+emptyChampionList : ChampionList
+emptyChampionList = ChampionList Dict.empty "" Dict.empty "" ""
+
+emptyRecommended: Recommended
+emptyRecommended = Recommended [] "" "" "" False "" ""
+
+emptyBlock: Block
+emptyBlock = Block [] False ""
+
 emptyItem: BlockItem
 emptyItem = BlockItem 0 0
 

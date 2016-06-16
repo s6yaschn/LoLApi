@@ -34,12 +34,12 @@ update msg model =
 
 -- VIEW
 
-icon : Version.Model -> Model -> Html Msg
-icon version model =
+icon : Version.Model -> BlockItem -> Html msg
+icon version item =
     img [src <| ddragon ++ "/"
             ++ getVersion version 
             ++ "/img/item/"
-            ++ toString model.item.id
+            ++ toString item.id
             ++ ".png"
         , alt ""] []
 
@@ -48,8 +48,8 @@ view : Model -> Html Msg
 view model =
     div []
         [ button [onClick <| NewItem {emptyItem| id = 1041}] [text "Click Me"]
-        , icon Version.testVersion model]
-
+        , icon Version.testVersion model.item]
+ 
 
 
 -- SUBSCRIPTIONS
