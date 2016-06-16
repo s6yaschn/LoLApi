@@ -1,18 +1,26 @@
-module Champion exposing (init, Msg, update, splashArt, skinSplashArt, loadingScreen, skinLoadingScreen)
+module Champion exposing (..)
 
 import Html exposing (..)
 import Html.App as Html
 import Html.Events exposing (..)
-import Html.Attributes exposing (..)
+import Html.Attributes exposing (src, alt)
 import Core exposing (..)
 import Static
 import Task
 import String
 import Region
+import Json.Decode exposing (..)
+import Image
+import ChampionInfo as Info
+import Recommended
+import Spell
+import Skin
+import Stats
+import Passive
 
 main =
     Html.program
-        { init = init {emptyChampion| key = "Aatrox", name = "Aatrox"}
+        { init = init
         , view = view 
         , update = update
         , subscriptions = subscriptions
@@ -21,12 +29,99 @@ main =
 
 -- MODEL 
 
-type alias Model =
-   Champion
+type Model = Model Champion
 
-init : Champion -> (Model, Cmd Msg)
-init champ =
-    ( champ , Cmd.none)
+type alias Champion = 
+    { allytips: List String
+    , blurb: String
+    , enemytips: List String
+    , id: Int
+    , image: Image.Model
+    , info: Info.Model
+    , key: String 
+    , lore: String
+    , name: String
+    , partype: String
+    , passive: Passive.Model
+    , recommended: List Recommended.Model
+    , skins: List Skin.Model
+    , spells: List Spell.Model
+    , stats: Stats.Model
+    , tags: List String
+    , title: String 
+    }
+
+champion : Decoder Champion
+champion =
+    Champion
+    <$> "allytips" := list string
+    <+> "blurb" := string 
+    <+> "enemytips" := list string 
+    <+> "id" := int 
+    <+> "image" := Image.decoder
+    <+> "info" := Info.decoder
+    <+> "key" := string  
+    <+> "lore" := string 
+    <+> "name" := string  
+    <+> "partype" := string 
+    <+> "passive" := Passive.decoder
+    <+> "recommended" := list Recommended.decoder
+    <+> "skins" := list Skin.decoder
+    <+> "spells" := list Spell.decoder
+    <+> "stats" := Stats.decoder
+    <+> "tags" := list string 
+    <+> "title" := string
+
+decoder : Decoder Model 
+decoder = map Model champion
+
+emptyChampion : Champion
+emptyChampion = 
+    Champion [] "" [] 34 (fst Image.init) (fst Info.init) "" "" "" "" (fst Passive.init) [] [] [] (fst Stats.init) [] ""
+
+-- ACCESSORS
+
+allytips: Model -> List String 
+allytips (Model champ) = champ.allytips
+
+blurb: Model -> String 
+blurb (Model champ) = champ.blurb
+
+enemytips : Model -> List String 
+enemytips (Model champ) = champ.enemytips
+
+id : Model -> Int 
+id (Model champ) = champ.id
+
+image : Model -> Image.Model
+image (Model champ) = champ.image
+
+info : Model -> Info.Model
+info (Model champ) = champ.info
+
+key : Model -> String 
+key (Model champ) = champ.key
+
+lore : Model -> String 
+lore (Model champ) = champ.lore
+
+name : Model -> String 
+name (Model champ) = champ.name
+
+-- clarify
+partype : Model -> String 
+partype (Model champ) = champ.partype
+
+
+getChampionById : Region.Endpoint -> Int -> Request Model
+getChampionById endpoint id =
+    Static.request endpoint decoder <| "champion/" ++ toString id ++ "?champData=all" 
+
+
+-- INIT
+
+init : (Model, Cmd Msg)
+init = ( Model emptyChampion , Cmd.none)
 
 
 -- UPDATE
@@ -34,13 +129,13 @@ init champ =
 
 type Msg
     = Search Int
-    | NewChamp Champion
+    | NewChamp Model
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of 
         Search id ->
-            (model, Task.perform (\_ -> NewChamp model) NewChamp (Static.getChampionById Region.euw id))
+            (model, Task.perform (\_ -> NewChamp model) NewChamp (getChampionById Region.euw id))
         NewChamp newChamp ->
             (newChamp, Cmd.none)
 
@@ -56,14 +151,14 @@ subscriptions model =
 -- VIEW
 
 splashArt : Model -> Html Msg
-splashArt model =
+splashArt (Model model) =
     img [src <| ddragon ++ "/img/champion/splash/" ++ model.key ++ "_0.jpg", alt model.name] []
 
 
 
 -- currently defaults to splashArt if invalid id, make sure to check skin range!
 skinSplashArt : Int -> Model -> Html Msg
-skinSplashArt id model =
+skinSplashArt id (Model model) =
     let 
         valid = validSkin id model
     in 
@@ -75,12 +170,12 @@ skinSplashArt id model =
  
 
 loadingScreen : Model -> Html Msg
-loadingScreen model =
+loadingScreen (Model model) =
     img [src <| ddragon ++ "/img/champion/loading/" ++ model.key ++ "_0.jpg", alt model.name] []
 
 
 skinLoadingScreen : Int -> Model -> Html Msg
-skinLoadingScreen id model =
+skinLoadingScreen id (Model model) =
     let
         valid = validSkin id model
     in
@@ -101,4 +196,4 @@ view model =
 -- helper functions
 validSkin : Int -> Champion -> Bool
 validSkin id champ =
-    not <| List.isEmpty <| List.filter (\x -> x.num == id) champ.skins
+    not <| List.isEmpty <| List.filter (\x -> Skin.num x == id) champ.skins

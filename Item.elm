@@ -6,6 +6,7 @@ import Html.Attributes exposing (..)
 import Html.App as Html
 import Core exposing (..)
 import Version exposing (getVersion)
+import Json.Decode exposing (..)
 
 main = Html.program
     { init = init 
@@ -16,26 +17,40 @@ main = Html.program
 
 -- MODEL
 
-type alias Model =
-  { item: BlockItem
-  }
+type alias BlockItem = 
+    { count: Int
+    , id: Int
+    }
 
+type Model = Model BlockItem
 
+blockItem : Decoder BlockItem 
+blockItem = 
+    BlockItem 
+    <$> "count" := int
+    <+> "id" := int 
+
+decoder : Decoder Model
+decoder = Model <$> blockItem
+
+emptyItem: BlockItem
+emptyItem = BlockItem 0 0
+ 
 -- UPDATE
 
-type Msg = NewItem BlockItem
+type Msg = NewItem Model
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of 
         NewItem newItem ->
-            (Model newItem, Cmd.none)
+            (newItem, Cmd.none)
 
 
 -- VIEW
 
-icon : Version.Model -> BlockItem -> Html msg
-icon version item =
+icon : Version.Model -> Model -> Html msg
+icon version (Model item) =
     img [src <| ddragon ++ "/"
             ++ getVersion version 
             ++ "/img/item/"
@@ -47,8 +62,8 @@ icon version item =
 view : Model -> Html Msg
 view model =
     div []
-        [ button [onClick <| NewItem {emptyItem| id = 1041}] [text "Click Me"]
-        , icon Version.testVersion model.item]
+        [ button [onClick <| NewItem <| Model {emptyItem| id = 1041}] [text "Click Me"]
+        , icon Version.testVersion model]
  
 
 

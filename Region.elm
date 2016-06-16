@@ -12,7 +12,7 @@ region (Endpoint x) = x.region
 
 platformID: Endpoint -> String
 platformID (Endpoint x) = x.platformID
-
+ 
 host: Endpoint -> String
 host (Endpoint x) = x.host
 
@@ -23,11 +23,11 @@ global = Endpoint
     , host = "global.api.pvp.net"
     }
 
-br : Endpoint
+br : Endpoint 
 br = Endpoint 
     { region = "br"
     , platformID = "br1"
-    , host = "br.api.pvp.net"
+    , host = "br.api.pvp.net" 
     }
 
 eune : Endpoint

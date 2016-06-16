@@ -1,63 +1,82 @@
 module Block exposing (..)
 
 import Html exposing (..)
-import Html.Events exposing (..)
-import Html.Attributes exposing (..)
 import Html.App as Html
 import Core exposing (..)
 import Version exposing (getVersion)
 import Item
 import Version exposing (testVersion)
-
+import Json.Decode exposing (..)
+import Item
 
 main = Html.program
     { init = init 
     , update = update
     , subscriptions = subscriptions
-    , view = view' 
+    , view = view
     }
 
+ 
+-- MODEL 
 
--- MODEL
+type alias Block = 
+    { items: List Item.Model
+    , recMath: Bool
+    , typ: String -- originally type
+    }
 
-type alias Model =
-  { block: Block
-  }
+type Model = Model Block
+
+block : Decoder Block
+block = 
+    Block
+    <$> "items" := list Item.decoder
+    <+> oneOf ["recMath" := bool, succeed False] -- optional
+    <+> oneOf ["type" := string, succeed ""] -- optional
 
 
--- UPDATE
+decoder : Decoder Model
+decoder = map Model block 
 
-type Msg = NewBlock Block
+emptyBlock: Block
+emptyBlock = Block [] False ""
+
+-- ACCESSORS
+
+items : Model -> List Item.Model
+items (Model b) = b.items
+
+typ : Model -> String 
+typ (Model b) = b.typ
+
+-- UPDATE 
+
+type Msg = NewBlock Model
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of 
         NewBlock newBlock ->
-            (Model newBlock, Cmd.none)
+            (newBlock, Cmd.none)
 
 
 -- VIEW
 
-view : Block -> Html msg
-view block =
+view : Model -> Html msg
+view (Model block) =
     let
         items = block.items 
     in 
         div [] <| List.map (Item.icon testVersion) items
 
-view' : Model -> Html Msg
-view' model = view model.block
-
--- SUBSCRIPTIONS
+-- SUBSCRIPTIONS 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    Sub.none 
 
 
 -- INIT
 
 init : (Model, Cmd Msg)
-init = (Model {emptyBlock| items = 
-    [ {emptyItem| id = 1001}
-    , {emptyItem| id = 1041}]}, Cmd.none)
+init = (Model emptyBlock, Cmd.none)

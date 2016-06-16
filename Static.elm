@@ -3,21 +3,10 @@ module Static exposing (..)
 import Json.Decode as Json exposing ((:=))
 import Region
 import Http
-import Html
-import Html.App
-import Task
 import Config exposing (key)
 import Core exposing (..)
 import String exposing (contains)
-
 import Debug exposing (log)
-
-main = Html.App.program
-    { init = ("", Task.perform toString (toString << .keys) (getAllChampions Region.euw))
-    , view = Html.text
-    , update = \x -> \y -> (x, Cmd.none)
-    , subscriptions =\x -> Sub.none
-     }
  
 
 -- CONSTANTS 
@@ -27,23 +16,16 @@ version = "v1.2"
 
 
 
-
+ 
 -- REQUESTS
 
-getAllChampions : Region.Endpoint -> Request ChampionList
-getAllChampions endpoint =
-    request endpoint championList "champion?champData=all" 
 
-getChampionById : Region.Endpoint -> Int -> Request Champion 
-getChampionById endpoint id =
-    request endpoint champion <| "champion/" ++ toString id ++ "?champData=all" 
+ 
+  
 
-getRealm : Region.Endpoint -> Request Realm
-getRealm endpoint =
-    request endpoint realm "realm"
+ 
 
-
--- HTTP
+-- HTTP 
 
 request: Region.Endpoint -> Json.Decoder a -> String -> Request a
 request endpoint decoder request = 
@@ -58,3 +40,4 @@ request endpoint decoder request =
                 else "?api_key=" ++ key       
     in
         Http.get decoder (log url url) -- Debug
+ 

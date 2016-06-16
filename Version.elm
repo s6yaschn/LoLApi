@@ -1,11 +1,11 @@
 module Version exposing (Model, init, Msg, update, getVersion, testVersion)
 
 import Task
-import Static
 import Region
 import Html exposing (..)
 import Html.Events exposing (..)
 import Html.App
+import Realm
 
 main = Html.App.program
   { init = init 
@@ -27,7 +27,7 @@ type alias Model =
 
 
 -- UPDATE
-
+ 
 type Msg 
     = Request
     | NewVersion String
@@ -36,7 +36,7 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
       Request ->
-        (model, Task.perform (always <| NewVersion model.version) NewVersion <| Task.map .v <| Static.getRealm Region.euw)
+        (model, Task.perform (always <| NewVersion model.version) NewVersion <| Task.map Realm.version <| Realm.getRealm Region.euw)
       NewVersion newVersion ->
         (Model newVersion, Cmd.none ) 
 
