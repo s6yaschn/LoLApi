@@ -3,7 +3,9 @@ module Recommended exposing (..)
 import Html exposing (..)
 import Core exposing (..)
 import Block
+import Icon
 import Json.Decode exposing (..)
+import List
 
 
  
@@ -50,7 +52,7 @@ title : Model -> String
 title (Model rec) = rec.title
 
 typ : Model -> String 
-typ (Model rec) = rec.typ
+typ (Model rec) = rec.typ 
   
 -- VIEW
 
@@ -58,7 +60,7 @@ view : Model -> Html a
 view (Model recommended) =
   let
     f: Block.Model -> Html a
-    f x = div [] [h3 [] [text <| Block.typ x], br [] [],  Block.view x ]
+    f x = div [] <| [h3 [] [text <| Block.typ x], br [] []] ++  List.map Item.icon <| Block.items x
   in
     div []
      <| h1 [] [text recommended.typ] ::  List.map f recommended.blocks
