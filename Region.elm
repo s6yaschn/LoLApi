@@ -25,7 +25,7 @@ global = Endpoint
 
 br : Endpoint 
 br = Endpoint 
-    { region = "br"
+    { region = "br" 
     , platformID = "br1"
     , host = "br.api.pvp.net" 
     }

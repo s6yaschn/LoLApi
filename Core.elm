@@ -11,15 +11,10 @@ type alias Request a = Task Http.Error a
 
 ddragon : String
 ddragon = "http://ddragon.leagueoflegends.com/cdn"
-
--- for testing:
-
  
 
-
- 
- 
--- for convenience: 
+  
+-- for convenience:  
 
 infixl 4 <$>
 (<$>) : (a -> b) -> Decoder a -> Decoder b

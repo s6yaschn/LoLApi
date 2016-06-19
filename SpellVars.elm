@@ -26,6 +26,3 @@ spellVars =
 
 decoder : Decoder Model
 decoder = map Model spellVars
- 
-
-  

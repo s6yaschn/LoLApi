@@ -1,14 +1,8 @@
 module Champion exposing (..)
 
 import Html exposing (..)
-import Html.App as Html
-import Html.Events exposing (..)
 import Html.Attributes exposing (src, alt)
-import Core exposing (..)
-import Static
-import Task
-import String
-import Region
+import Core exposing (..) 
 import Json.Decode exposing (..)
 import Image
 import ChampionInfo as Info
@@ -17,15 +11,6 @@ import Spell
 import Skin
 import Stats
 import Passive
-
-main =
-    Html.program
-        { init = init
-        , view = view 
-        , update = update
-        , subscriptions = subscriptions
-        }
-
 
 -- MODEL 
 
@@ -73,11 +58,8 @@ champion =
     <+> "title" := string
 
 decoder : Decoder Model 
-decoder = map Model champion
+decoder = map Model champion 
 
-emptyChampion : Champion
-emptyChampion = 
-    Champion [] "" [] 34 (fst Image.init) (fst Info.init) "" "" "" "" (fst Passive.init) [] [] [] (fst Stats.init) [] ""
 
 -- ACCESSORS
 
@@ -102,7 +84,7 @@ info (Model champ) = champ.info
 key : Model -> String 
 key (Model champ) = champ.key
 
-lore : Model -> String 
+lore : Model -> String  
 lore (Model champ) = champ.lore
 
 name : Model -> String 
@@ -113,51 +95,16 @@ partype : Model -> String
 partype (Model champ) = champ.partype
 
 
-getChampionById : Region.Endpoint -> Int -> Request Model
-getChampionById endpoint id =
-    Static.request endpoint decoder <| "champion/" ++ toString id ++ "?champData=all" 
+-- VIEW 
 
-
--- INIT
-
-init : (Model, Cmd Msg)
-init = ( Model emptyChampion , Cmd.none)
-
-
--- UPDATE
-
-
-type Msg
-    = Search Int
-    | NewChamp Model
-
-update : Msg -> Model -> (Model, Cmd Msg)
-update msg model =
-    case msg of 
-        Search id ->
-            (model, Task.perform (\_ -> NewChamp model) NewChamp (getChampionById Region.euw id))
-        NewChamp newChamp ->
-            (newChamp, Cmd.none)
-
-
--- SUBSCRIPTIONS
-
-
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.none
-
-
--- VIEW
-
-splashArt : Model -> Html Msg
+splashArt : Model -> Html a
 splashArt (Model model) =
     img [src <| ddragon ++ "/img/champion/splash/" ++ model.key ++ "_0.jpg", alt model.name] []
 
 
 
 -- currently defaults to splashArt if invalid id, make sure to check skin range!
-skinSplashArt : Int -> Model -> Html Msg
+skinSplashArt : Int -> Model -> Html a
 skinSplashArt id (Model model) =
     let 
         valid = validSkin id model
@@ -169,12 +116,12 @@ skinSplashArt id (Model model) =
             , alt model.name] []
  
 
-loadingScreen : Model -> Html Msg
+loadingScreen : Model -> Html a
 loadingScreen (Model model) =
     img [src <| ddragon ++ "/img/champion/loading/" ++ model.key ++ "_0.jpg", alt model.name] []
 
 
-skinLoadingScreen : Int -> Model -> Html Msg
+skinLoadingScreen : Int -> Model -> Html a
 skinLoadingScreen id (Model model) =
     let
         valid = validSkin id model
@@ -184,15 +131,7 @@ skinLoadingScreen id (Model model) =
                 ++ (if valid then toString id else "0")
                 ++ ".jpg"
             , alt model.name] []
-
-view : Model -> Html Msg
-view model =
-    div []
-        [ input [onInput (\x -> Search (Result.withDefault 34 (String.toInt x)))] []
-        , skinLoadingScreen 3 model
-        ]
-
-
+ 
 -- helper functions
 validSkin : Int -> Champion -> Bool
 validSkin id champ =

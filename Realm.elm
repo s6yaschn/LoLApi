@@ -3,7 +3,6 @@ module Realm exposing (..)
 import Json.Decode exposing (..)
 import Dict exposing (Dict)
 import Core exposing (..)
-import Static
 import Region
 
 -- MODEL
@@ -48,6 +47,4 @@ cdn (Model realm) = realm.cdn
 version : Model -> String 
 version (Model realm) = realm.dd
 
-getRealm : Region.Endpoint -> Request Model
-getRealm endpoint =
-    Static.request endpoint decoder "realm"
+

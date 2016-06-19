@@ -3,24 +3,12 @@ module Spell exposing (..)
 
 import Core exposing (..)
 import Html exposing (Html, img, text, div, button)
-import Html.App exposing (program)
 import Html.Attributes exposing (src, alt)
-import Version exposing (getVersion, testVersion)
-import Html.Events exposing (onClick)
+import Realm
 import Image
 import LevelTip
 import SpellVars
-import Json.Decode exposing (..)
-
-
-main = program 
-  { init = init 
-  , update = update
-  , view = view
-  , subscriptions = subscriptions
-  }
-
- 
+import Json.Decode exposing (..) 
  
 -- MODEL
 
@@ -81,49 +69,12 @@ decoder : Decoder Model
 decoder = map Model championSpell
 
 
-emptySpell: ChampionSpell
-emptySpell = ChampionSpell [] [] "" [] "" "" "" [] [] (fst Image.init) "" (fst LevelTip.init) 0 "" (Err "") "" "" "" "" "" []
-
-
--- UPDATE
-
-type Msg = NewSpell ChampionSpell
-
-update : Msg -> Model -> (Model, Cmd Msg)
-update msg model =
-  case msg of
-    NewSpell newSpell ->
-      (Model newSpell, Cmd.none)
-
- 
-
 -- VIEW
 
-icon : Version.Model -> Model -> Html Msg
-icon version (Model spell) =
+icon : Realm.Model -> Model -> Html a
+icon realm (Model spell) =
   img [src <| ddragon 
-        ++ "/" ++ getVersion version
+        ++ "/" ++ Realm.version realm
         ++ "/img/spell/" 
         ++ Image.full spell.image
       , alt spell.name] []
-
-
-view : Model -> Html Msg
-view model =
-  div [] 
-    [ button [onClick <| NewSpell emptySpell] [text "Click me"]
-    , icon testVersion model]
-
-
--- SUBSCRIPTIONS
-
-subscriptions : Model -> Sub Msg
-subscriptions model =
-  Sub.none
-
-
--- INIT
-
-init : (Model, Cmd Msg)
-init =
-  (Model emptySpell, Cmd.none)

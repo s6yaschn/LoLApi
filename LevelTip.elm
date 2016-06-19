@@ -22,9 +22,6 @@ levelTip =
 decoder : Decoder Model 
 decoder = map Model levelTip 
 
-emptyLevelTip: LevelTip
-emptyLevelTip = LevelTip [] []
-
 -- ACCESSORS
 
 effect : Model -> List String 
@@ -32,10 +29,3 @@ effect (Model tip) = tip.effect
 
 label : Model -> List String
 label (Model tip) = tip.label
-
-
-
--- INIT
-
-init : (Model, Cmd msg)
-init = (Model emptyLevelTip, Cmd.none)

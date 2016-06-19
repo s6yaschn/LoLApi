@@ -1,5 +1,9 @@
-module Version exposing (Model, init, Msg, update, getVersion, testVersion)
+module Version exposing (..)
 
+bla : String
+bla = "bla"
+
+{-
 import Task
 import Region
 import Html exposing (..)
@@ -24,9 +28,9 @@ testVersion = {version = "6.12.1"}
 type alias Model =
   { version : String
   }
+ 
 
-
--- UPDATE
+-- UPDATE 
  
 type Msg 
     = Request
@@ -62,4 +66,5 @@ subscriptions model =
 
 init : (Model, Cmd Msg)
 init =
-  (Model "Click Me", Cmd.none)
+  (Model "Click Me", Cmd.none)-}
+ 

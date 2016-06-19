@@ -57,8 +57,6 @@ stats =
 decoder : Decoder Model
 decoder = map Model stats
 
-emptyStats: Stats
-emptyStats = Stats 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 
 -- ACCESSORS
 
@@ -98,8 +96,3 @@ manaregen (Model s) = (s.mpregen, s.mpregenperlevel)
 
 magicresist : Model -> (Float, Float)
 magicresist (Model s) = (s.spellblock, s.spellblockperlevel)
-
-
--- INIT
-init : (Model, Cmd msg)
-init = (Model emptyStats, Cmd.none)

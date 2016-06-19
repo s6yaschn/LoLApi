@@ -1,17 +1,10 @@
 module Recommended exposing (..)
 
 import Html exposing (..)
-import Html.App as Html
 import Core exposing (..)
 import Block
 import Json.Decode exposing (..)
 
-main = Html.program
-    { init = init 
-    , update = update
-    , subscriptions = subscriptions
-    , view = view 
-    }
 
  
 -- MODEL
@@ -42,10 +35,6 @@ recommended =
 decoder : Decoder Model
 decoder = Json.Decode.map Model recommended
 
-emptyRecommended: Recommended
-emptyRecommended = Recommended [] "" "" "" False "" ""
-
-
 -- ACCESSORS
 
 blocks : Model -> List Block.Model
@@ -62,39 +51,14 @@ title (Model rec) = rec.title
 
 typ : Model -> String 
 typ (Model rec) = rec.typ
-
--- UPDATE
-
-type Msg = NewRecommended Recommended
-
-update : Msg -> Model -> (Model, Cmd Msg)
-update msg model =
-    case msg of
-        NewRecommended new -> 
-          (Model new, Cmd.none)
-
-
   
 -- VIEW
 
-view : Model -> Html Msg 
+view : Model -> Html a 
 view (Model recommended) =
   let
-    f: Block.Model -> Html Msg
+    f: Block.Model -> Html a
     f x = div [] [h3 [] [text <| Block.typ x], br [] [],  Block.view x ]
   in
     div []
      <| h1 [] [text recommended.typ] ::  List.map f recommended.blocks
-
- 
--- SUBSCRIPTIONS
-
-subscriptions : Model -> Sub Msg
-subscriptions model =
-  Sub.none
-
-
--- INIT
-
-init : (Model, Cmd Msg)
-init = (Model emptyRecommended, Cmd.none)

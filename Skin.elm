@@ -33,14 +33,3 @@ name (Model skin) = skin.name
 
 num : Model -> Int
 num (Model skin) = skin.num
-
-
--- UPDATE
-
-type Msg = NewSkin Model
-
-update : Msg -> Model -> (Model, Cmd Msg)
-update msg model =
-    case msg of
-        NewSkin new ->
-            (new, Cmd.none)
