@@ -9,6 +9,7 @@ import Debug exposing (log)
 import Champion
 import Realm 
 import ChampionList
+import Task exposing (Task)
 
 -- CONSTANTS 
 
@@ -32,21 +33,21 @@ new reg key = Model <| Static reg key
 
 -- REQUESTS
 
-getRealm : Model -> Request Realm.Model
+getRealm : Model -> Task Http.Error Realm.Model
 getRealm model = 
     request model Realm.decoder "realm"
 
-getChampionById : Model -> Int -> Request Champion.Model
+getChampionById : Model -> Int -> Task Http.Error Champion.Model
 getChampionById model id =
     request model Champion.decoder <| "champion/" ++ toString id ++ "?champData=all" 
 
-getAllChampions : Model -> Request ChampionList.Model
+getAllChampions : Model -> Task Http.Error ChampionList.Model
 getAllChampions model =
     request model ChampionList.decoder "champion?champData=all" 
 
 -- HTTP 
 
-request: Model -> Json.Decoder a -> String -> Request a
+request: Model -> Json.Decoder a -> String -> Task Http.Error a
 request (Model {endpoint, key}) decoder request = 
     let
         reg = Region.region endpoint

@@ -1,10 +1,16 @@
 module Main exposing (..)
 
 import Champion
+import Static
 import Html exposing (..)
 import Html.Events exposing (..)
 import Html.Attributes exposing (..)
 import Html.App
+import Region
+import String
+import Result
+import Task
+import Http
 
 main = Html.App.program 
     { init = init 
@@ -14,10 +20,8 @@ main = Html.App.program
     }
 
 
-
-
 type alias Model =
-  { key: Key.Model
+  { static: Static.Model
   , champion: Champion.Model
   }
 
@@ -25,13 +29,27 @@ type alias Model =
 -- UPDATE
  
 type Msg 
-    = NewKey Key.Model
+    = NewKey String
+    | Search String
+    | Fail Http.Error
+    | Succeed Champion.Model
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update message model =
     case message of 
-        NewKey newKey ->
-            ({model| key = newKey}, Cmd.none)
+        NewKey key ->
+            ({model| static = Static.new Region.euw key}, Cmd.none)
+        Search s ->
+            let
+                id = Result.withDefault -1 <| String.toInt s 
+            in 
+                (model, Task.perform Fail Succeed <| Static.getChampionById model.static id)
+        Fail _ -> 
+            (model, Cmd.none) 
+        Succeed champ ->
+            ({model| champion = champ}, Cmd.none)
+
+
 
 
 -- VIEW
@@ -40,10 +58,13 @@ view : Model -> Html Msg
 view model =
     div []
         [ input [ placeholder "enter API key"
-                , onInput (NewKey << Key.new)
+                , onInput NewKey
                 ] []
         , input [ placeholder "enter Champion ID"
-                , onInput ]
+                , onInput Search
+                ] []
+        , br [] []
+        , Champion.splashArt model.champion
         ]
 
 
@@ -57,4 +78,4 @@ subscriptions model =
 -- INIT
 
 init : (Model, Cmd Msg)
-init = ({ key = Key.init}, Cmd.none)
+init = ({static = Static.new Region.euw "", champion = Champion.empty} , Cmd.none)

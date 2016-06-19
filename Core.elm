@@ -1,12 +1,7 @@
 module Core exposing (..)
 
 import Json.Decode exposing (..)
-import Task exposing (Task)
-import Http
 
--- TYPES
-type alias Request a = Task Http.Error a
- 
 -- CONSTANTS
 
 ddragon : String

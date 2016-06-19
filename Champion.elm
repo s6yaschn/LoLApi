@@ -14,7 +14,9 @@ import Passive
 
 -- MODEL 
 
-type Model = Model Champion
+type Model 
+    = Model Champion
+    | Empty
 
 type alias Champion = 
     { allytips: List String
@@ -60,9 +62,11 @@ champion =
 decoder : Decoder Model 
 decoder = map Model champion 
 
+empty : Model
+empty = Empty
 
 -- ACCESSORS
-
+{--     TODO: Error handling
 allytips: Model -> List String 
 allytips (Model champ) = champ.allytips
 
@@ -93,44 +97,60 @@ name (Model champ) = champ.name
 -- clarify
 partype : Model -> String 
 partype (Model champ) = champ.partype
-
+--}
 
 -- VIEW 
 
 splashArt : Model -> Html a
-splashArt (Model model) =
-    img [src <| ddragon ++ "/img/champion/splash/" ++ model.key ++ "_0.jpg", alt model.name] []
+splashArt m =
+    case m of
+        Empty ->
+            div [] []
+        Model model ->
+            img [src <| ddragon ++ "/img/champion/splash/" ++ model.key ++ "_0.jpg", alt model.name] []
 
 
 
 -- currently defaults to splashArt if invalid id, make sure to check skin range!
 skinSplashArt : Int -> Model -> Html a
-skinSplashArt id (Model model) =
-    let 
-        valid = validSkin id model
-    in 
-        img [ src <| ddragon ++ "/img/champion/splash/" 
-                ++ model.key ++ "_" 
-                ++ (if valid then toString id else "0")
-                ++ ".jpg"
-            , alt model.name] []
+skinSplashArt id m =
+    case m of 
+        Empty ->
+            div [] []
+        Model model ->
+            let 
+                valid = validSkin id model
+            in 
+                 img [ src <| ddragon ++ "/img/champion/splash/" 
+                         ++ model.key ++ "_" 
+                         ++ (if valid then toString id else "0")
+                         ++ ".jpg"
+                     , alt model.name] []
  
 
 loadingScreen : Model -> Html a
-loadingScreen (Model model) =
-    img [src <| ddragon ++ "/img/champion/loading/" ++ model.key ++ "_0.jpg", alt model.name] []
+loadingScreen m =
+    case m of 
+        Empty -> 
+            div [] []
+        Model model ->
+            img [src <| ddragon ++ "/img/champion/loading/" ++ model.key ++ "_0.jpg", alt model.name] []
 
 
 skinLoadingScreen : Int -> Model -> Html a
-skinLoadingScreen id (Model model) =
-    let
-        valid = validSkin id model
-    in
-        img [ src <| ddragon ++ "/img/champion/loading/"
-                ++ model.key ++ "_"
-                ++ (if valid then toString id else "0")
-                ++ ".jpg"
-            , alt model.name] []
+skinLoadingScreen id m =
+    case m of
+        Empty ->
+            div [] []
+        Model model ->
+            let
+                valid = validSkin id model
+            in
+                img [ src <| ddragon ++ "/img/champion/loading/"
+                        ++ model.key ++ "_"
+                        ++ (if valid then toString id else "0")
+                        ++ ".jpg"
+                    , alt model.name] []
  
 -- helper functions
 validSkin : Int -> Champion -> Bool
