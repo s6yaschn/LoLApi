@@ -3,10 +3,10 @@ module Recommended exposing (..)
 import Html exposing (..)
 import Core exposing (..)
 import Block
-import Icon
+import Item
 import Json.Decode exposing (..)
 import List
-
+import Realm
 
  
 -- MODEL
@@ -56,11 +56,11 @@ typ (Model rec) = rec.typ
   
 -- VIEW
 
-view : Model -> Html a 
-view (Model recommended) =
+view : Realm.Model -> Model -> Html a 
+view realm (Model recommended) =
   let
     f: Block.Model -> Html a
-    f x = div [] <| [h3 [] [text <| Block.typ x], br [] []] ++  List.map Item.icon <| Block.items x
+    f x = div [] <| [h3 [] [text <| Block.typ x], br [] []] ++  List.map (Item.icon realm) (Block.items x)
   in
     div []
      <| h1 [] [text recommended.typ] ::  List.map f recommended.blocks
