@@ -5,6 +5,7 @@ import Core exposing (..)
 import Champion 
 import Json.Decode exposing (..)
 import Dict exposing (Dict)
+import List
 
 -- MODEL 
 
@@ -16,7 +17,9 @@ type alias ChampionList =
     , version: String
     }
 
-type Model = Model ChampionList
+type Model 
+    = Model ChampionList
+    | Empty
 
 championList : Decoder ChampionList
 championList = 
@@ -30,15 +33,37 @@ championList =
 decoder : Decoder Model
 decoder = map Model championList
 
+empty : Model
+empty = Empty
 
+isEmpty : Model -> Bool
+isEmpty m =
+    case m of 
+        Empty -> True
+        _ -> False
 
 -- ACCESSORS
 
-data : Model -> Dict String Champion.Model
-data (Model cl) = cl.data
+data : Model -> Result String (Dict String Champion.Model)
+data m =
+    case m of 
+        Empty -> emptyModelError "ChampionList.data"
+        Model {data} -> Ok data
 
-keys : Model -> Dict String String 
-keys (Model cl) = cl.keys
+--types
+keys : Model -> Result String (Dict String String) 
+keys m = 
+    case m of 
+        Empty -> emptyModelError "ChampionList.keys"
+        Model {keys} -> Ok keys
 
 
-
+-- types
+ids : Model -> Result String (Dict String String)
+ids m =
+    let 
+        switch = \(a,b) -> (b,a)
+    in 
+        case m of 
+            Empty -> emptyModelError "ChampionList.ids"
+            Model {keys} -> keys |> Dict.toList |> List.map switch |> Dict.fromList |> Ok

@@ -11,6 +11,7 @@ import Spell
 import Skin
 import Stats
 import Passive
+import Regex exposing (..)
 
 -- MODEL 
 
@@ -48,7 +49,7 @@ champion =
     <+> "image" := Image.decoder
     <+> "info" := Info.decoder
     <+> "key" := string  
-    <+> "lore" := string 
+    <+> map break ("lore" := string) -- parse line breaks in returned html
     <+> "name" := string  
     <+> "partype" := string 
     <+> "passive" := Passive.decoder
@@ -66,38 +67,108 @@ empty : Model
 empty = Empty
 
 -- ACCESSORS
-{--     TODO: Error handling
-allytips: Model -> List String 
-allytips (Model champ) = champ.allytips
 
-blurb: Model -> String 
-blurb (Model champ) = champ.blurb
+allytips: Model -> Result String (List String) 
+allytips m = 
+    case m of 
+        Empty -> emptyModelError "Champion.allytips"
+        Model {allytips} -> Ok allytips
 
-enemytips : Model -> List String 
-enemytips (Model champ) = champ.enemytips
+blurb: Model -> Result String String 
+blurb m = 
+    case m of 
+        Empty -> emptyModelError "Champion.blurb"
+        Model {blurb} -> Ok blurb
 
-id : Model -> Int 
-id (Model champ) = champ.id
+enemytips : Model -> Result String (List String) 
+enemytips m = 
+    case m of
+        Empty -> emptyModelError "Champion.enemytips"
+        Model {enemytips} -> Ok enemytips
 
-image : Model -> Image.Model
-image (Model champ) = champ.image
+id : Model -> Result String Int 
+id m = 
+    case m of 
+        Empty -> emptyModelError "Champion.id"
+        Model {id} -> Ok id
 
-info : Model -> Info.Model
-info (Model champ) = champ.info
+image : Model -> Result String Image.Model
+image m = 
+    case m of 
+        Empty -> emptyModelError "Champion.image"
+        Model {image} -> Ok image
 
-key : Model -> String 
-key (Model champ) = champ.key
+info : Model -> Result String Info.Model
+info m = 
+    case m of
+        Empty -> emptyModelError "Champion.info"
+        Model {info} -> Ok info
 
-lore : Model -> String  
-lore (Model champ) = champ.lore
+key : Model -> Result String String 
+key m = 
+    case m of 
+        Empty -> emptyModelError "Champion.key"
+        Model {key} -> Ok key
 
-name : Model -> String 
-name (Model champ) = champ.name
+lore : Model -> Result String String  
+lore m =
+    case m of
+        Empty -> emptyModelError "Champion.lore"
+        Model {lore} -> Ok lore
 
--- clarify
-partype : Model -> String 
-partype (Model champ) = champ.partype
---}
+name : Model -> Result String String 
+name m =
+    case m of 
+        Empty -> emptyModelError "Champion.name"
+        Model {name} -> Ok name
+
+partype : Model -> Result String String 
+partype m = 
+    case m of 
+        Empty -> emptyModelError "Champion.partype"
+        Model {partype} -> Ok partype
+
+passive : Model -> Result String Passive.Model
+passive m =
+    case m of
+        Empty -> emptyModelError "Champion.passive"
+        Model {passive} -> Ok passive
+
+recommended : Model -> Result String (List Recommended.Model)
+recommended m =
+    case m of 
+        Empty -> emptyModelError "Champion.recommended"
+        Model {recommended} -> Ok recommended
+
+skins : Model -> Result String (List Skin.Model)
+skins m =
+    case m of 
+        Empty -> emptyModelError "Champion.skins"
+        Model {skins} -> Ok skins
+
+spells : Model -> Result String (List Spell.Model)
+spells m =
+    case m of 
+        Empty -> emptyModelError "Champion.spells"
+        Model {spells} -> Ok spells
+
+stats : Model -> Result String Stats.Model
+stats m =
+    case m of 
+        Empty -> emptyModelError "Champion.stats"
+        Model {stats} -> Ok stats
+
+tags : Model -> Result String (List String)
+tags m =
+    case m of 
+        Empty -> emptyModelError "Champion.tags"
+        Model {tags} -> Ok tags
+
+title : Model -> Result String String 
+title m =
+    case m of 
+        Empty -> emptyModelError "Champion.title"
+        Model {title} -> Ok title
 
 -- VIEW 
 
@@ -156,3 +227,6 @@ skinLoadingScreen id m =
 validSkin : Int -> Champion -> Bool
 validSkin id champ =
     not <| List.isEmpty <| List.filter (\x -> Skin.num x == id) champ.skins
+
+break : String -> String 
+break = replace All (regex <| escape "<br>") (\_ -> "\n")
