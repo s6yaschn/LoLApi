@@ -1,5 +1,10 @@
-module SpellVars exposing (Model,
- empty, isEmpty, decoder)
+module SpellVars
+    exposing
+        ( Model
+        , empty
+        , isEmpty
+        , decoder
+        )
 
 import Json.Decode exposing (..)
 import Core exposing (..)
@@ -21,14 +26,20 @@ type Model
     = Model SpellVars
     | Empty
 
-empty: Model
-empty = Empty
+
+empty : Model
+empty =
+    Empty
+
 
 isEmpty : Model -> Bool
-isEmpty m = 
-    case m of 
-        Empty -> True 
-        _ -> False
+isEmpty m =
+    case m of
+        Empty ->
+            True
+
+        _ ->
+            False
 
 
 spellVars : Decoder SpellVars
@@ -49,12 +60,9 @@ spellVars =
             "link"
         :=
             string
-        <+> -- optional
+        <+>
+            -- optional
             oneOf [ "ranksWith" := string, succeed "" ]
-
-
-
-
 
 
 decoder : Decoder Model
