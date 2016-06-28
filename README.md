@@ -8,7 +8,7 @@ Planned Features:
 - use of the original icons and images, show details on click/hover/ something similar
 - server and language selection
 
-
+Current version available [here](http://s6yaschn.github.io/LoLApi/).
 
 Disclaimer:
  LoLApi isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games 
