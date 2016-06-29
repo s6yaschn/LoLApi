@@ -7,7 +7,7 @@ module SpellVars
         )
 
 import Json.Decode exposing (..)
-import Core exposing (..)
+import Json.Decode.Extra exposing (..)
 
 
 -- MODEL
@@ -44,25 +44,12 @@ isEmpty m =
 
 spellVars : Decoder SpellVars
 spellVars =
-    SpellVars
-        <$>
-            "coeff"
-        :=
-            list float
-        <+>
-            oneOf [ "dyn" := string, succeed "" ]
-        -- optional
-        <+>
-            "key"
-        :=
-            string
-        <+>
-            "link"
-        :=
-            string
-        <+>
-            -- optional
-            oneOf [ "ranksWith" := string, succeed "" ]
+    succeed SpellVars
+        |: ("coeff" := list float)
+        |: withDefault "" ("dyn" := string)
+        |: ("key" := string)
+        |: ("link" := string)
+        |: withDefault "" ("ranksWith" := string)
 
 
 decoder : Decoder Model

@@ -16,6 +16,7 @@ import Image
 import LevelTip
 import SpellVars
 import Json.Decode exposing (..)
+import Json.Decode.Extra exposing (..)
 
 
 -- MODEL
@@ -70,89 +71,28 @@ isEmpty m =
 
 championSpell : Decoder ChampionSpell
 championSpell =
-    ChampionSpell
-        <$>
-            oneOf [ "altimages" := list Image.decoder, succeed [] ]
-        -- optional
-        <+>
-            "cooldown"
-        :=
-            list float
-        <+>
-            "cooldownBurn"
-        :=
-            string
-        <+>
-            "cost"
-        :=
-            list int
-        <+>
-            "costBurn"
-        :=
-            string
-        <+>
-            "costType"
-        :=
-            string
-        <+>
-            "description"
-        :=
-            string
-        <+>
-            "effect"
-        :=
-            list (oneOf [ null [ -1 ], (list float) ])
-        -- 1-indexed arrays, ignore the first null and insert -1
-        <+>
-            "effectBurn"
-        :=
-            list string
-        <+>
-            "image"
-        :=
-            Image.decoder
-        <+>
-            "key"
-        :=
-            string
-        <+>
-            "leveltip"
-        :=
-            LevelTip.decoder
-        <+>
-            "maxrank"
-        :=
-            int
-        <+>
-            "name"
-        :=
-            string
-        <+>
-            "range"
-        :=
-            oneOf [ Err <$> string, Ok <$> list int ]
-        <+>
-            "rangeBurn"
-        :=
-            string
-        <+>
-            oneOf [ "resource" := string, succeed "" ]
-        -- optional
-        <+>
-            "sanitizedDescription"
-        :=
-            string
-        <+>
-            "sanitizedTooltip"
-        :=
-            string
-        <+>
-            "tooltip"
-        :=
-            string
-        <+>
-            -- optional
-            oneOf [ "vars" := list SpellVars.decoder, succeed [] ]
+    succeed ChampionSpell
+        |: withDefault [] ("altimages" := list Image.decoder)
+        |: ("cooldown" := list float)
+        |: ("cooldownBurn" := string)
+        |: ("cost" := list int)
+        |: ("costBurn" := string)
+        |: ("costType" := string)
+        |: ("description" := string)
+        |: ("effect" := list (oneOf [ null [ -1 ], (list float) ]))
+        |: ("effectBurn" := list string)
+        |: ("image" := Image.decoder)
+        |: ("key" := string)
+        |: ("leveltip" := LevelTip.decoder)
+        |: ("maxrank" := int)
+        |: ("name" := string)
+        |: ("range" := oneOf [ map Err string, map Ok (list int) ])
+        |: ("rangeBurn" := string)
+        |: withDefault "" ("resource" := string)
+        |: ("sanitizedDescription" := string)
+        |: ("sanitizedTooltip" := string)
+        |: ("tooltip" := string)
+        |: withDefault [] ("vars" := list SpellVars.decoder)
 
 
 decoder : Decoder Model
@@ -189,12 +129,12 @@ icon realm m =
                 text ""
             else
                 img
-                    [ src
-                        <| ddragon
-                        ++ "/"
-                        ++ Result.withDefault "" (Realm.version realm)
-                        ++ "/img/spell/"
-                        ++ Result.withDefault "" (Image.full spell.image)
+                    [ src <|
+                        ddragon
+                            ++ "/"
+                            ++ Result.withDefault "" (Realm.version realm)
+                            ++ "/img/spell/"
+                            ++ Result.withDefault "" (Image.full spell.image)
                     , alt spell.name
                     ]
                     []

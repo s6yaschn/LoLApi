@@ -2,60 +2,58 @@ module Endpoint exposing (Model, region, platformID, host, global, br, eune, euw
 
 
 type Model
-    = Endpoint 
+    = Model
         { region : String
         , platformID : String
         , host : String
         }
 
--- band aid, to be cleaned up
-type alias Endpoint = Model 
 
-region : Endpoint -> String
-region (Endpoint x) =
-    x.region
+region : Model -> String
+region (Model { region }) =
+    region
 
 
-platformID : Endpoint -> String
-platformID (Endpoint x) =
-    x.platformID
+platformID : Model -> String
+platformID (Model { platformID }) =
+    platformID
 
 
-host : Endpoint -> String
-host (Endpoint x) =
-    x.host
+host : Model -> String
+host (Model { host }) =
+    host
 
 
-global : Endpoint
+global : Model
 global =
-    Endpoint
+    Model
         { region = "global"
         , platformID = ""
         , host = "global.api.pvp.net"
         }
- 
 
-br : Endpoint
+
+br : Model
 br =
-    Endpoint
+    Model
         { region = "br"
         , platformID = "br1"
         , host = "br.api.pvp.net"
         }
 
-
-eune : Endpoint
+ 
+eune : Model
 eune =
-    Endpoint
+    Model
         { region = "eune"
         , platformID = "eun1"
         , host = "eune.api.pvp.net"
         }
 
 
-euw : Endpoint
+euw : Model
 euw =
-    Endpoint
+    Model
         { region = "euw"
         , platformID = "euw1"
         , host = "euw.api.pvp.net"

@@ -1,7 +1,7 @@
 module Stats exposing (..)
 
-import Core exposing (..)
 import Json.Decode exposing (..)
+import Json.Decode.Extra exposing (..)
 
 
 -- MODEL
@@ -37,47 +37,27 @@ type Model
 
 stats : Decoder Stats
 stats =
-    Stats
-        <$> "armor"
-        := float
-        <+> "armorperlevel"
-        := float
-        <+> "attackdamage"
-        := float
-        <+> "attackdamageperlevel"
-        := float
-        <+> "attackrange"
-        := float
-        <+> "attackspeedoffset"
-        := float
-        <+> "attackspeedperlevel"
-        := float
-        <+> "crit"
-        := float
-        <+> "critperlevel"
-        := float
-        <+> "hp"
-        := float
-        <+> "hpperlevel"
-        := float
-        <+> "hpregen"
-        := float
-        <+> "hpregenperlevel"
-        := float
-        <+> "movespeed"
-        := float
-        <+> "mp"
-        := float
-        <+> "mpperlevel"
-        := float
-        <+> "mpregen"
-        := float
-        <+> "mpregenperlevel"
-        := float
-        <+> "spellblock"
-        := float
-        <+> "spellblockperlevel"
-        := float
+    succeed Stats
+        |: ("armor" := float)
+        |: ("armorperlevel" := float)
+        |: ("attackdamage" := float)
+        |: ("attackdamageperlevel" := float)
+        |: ("attackrange" := float)
+        |: ("attackspeedoffset" := float)
+        |: ("attackspeedperlevel" := float)
+        |: ("crit" := float)
+        |: ("critperlevel" := float)
+        |: ("hp" := float)
+        |: ("hpperlevel" := float)
+        |: ("hpregen" := float)
+        |: ("hpregenperlevel" := float)
+        |: ("movespeed" := float)
+        |: ("mp" := float)
+        |: ("mpperlevel" := float)
+        |: ("mpregen" := float)
+        |: ("mpregenperlevel" := float)
+        |: ("spellblock" := float)
+        |: ("spellblockperlevel" := float)
 
 
 decoder : Decoder Model

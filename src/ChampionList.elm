@@ -14,9 +14,10 @@ import Champion
 import Json.Decode exposing (..)
 import Dict exposing (Dict)
 import List
+import Json.Decode.Extra exposing (..)
 
 
--- MODEL 
+-- MODEL
 
 
 type alias ChampionList =
@@ -37,19 +38,14 @@ type Model
 
 championList : Decoder ChampionList
 championList =
-    ChampionList
-        <$> "data"
-        := dict Champion.decoder
-        <+> "format"
-        := string
-        <+> "keys"
-        := dict string
-        <+> "type"
-        := string
-        <+> "version"
-        := string
+    succeed ChampionList
+        |: ("data" := dict Champion.decoder)
+        |: ("format" := string)
+        |: ("keys" := dict string)
+        |: ("type" := string)
+        |: ("version" := string)
 
-
+ 
 decoder : Decoder Model
 decoder =
     map Model championList

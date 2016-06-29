@@ -10,6 +10,8 @@ Planned Features:
 
 Current version available [here](http://s6yaschn.github.io/LoLApi/).
 
+Requires a [Riot Games API key](https://developer.riotgames.com).
+
 Disclaimer:
  LoLApi isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games 
  or anyone officially involved in producing or managing League of Legends. 

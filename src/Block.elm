@@ -11,6 +11,7 @@ module Block
 import Core exposing (..)
 import Item
 import Json.Decode exposing (..)
+import Json.Decode.Extra exposing (..)
 
 
 -- MODEL
@@ -47,19 +48,13 @@ isEmpty m =
 
 block : Decoder Block
 block =
-    Block
-        <$>
-            "items"
-        :=
-            list Item.decoder
-        <+>
-            oneOf [ "recMath" := bool, succeed False ]
-        -- optional
-        <+>
-            oneOf [ "type" := string, succeed "" ]
+    succeed Block
+        |: ("items" := list Item.decoder)
+        |: withDefault False ("recMath" := bool)
+        |: withDefault "" ("type" := string)
 
 
-decoder : Decoder Model
+decoder : Decoder Model 
 decoder =
     map Model block
 

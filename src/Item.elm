@@ -14,11 +14,12 @@ import Html.Attributes exposing (..)
 import Core exposing (..)
 import Json.Decode exposing (..)
 import Realm
+import Json.Decode.Extra exposing (..)
 
 
 -- MODEL
 
- 
+
 type alias BlockItem =
     { count : Int
     , id : Int
@@ -47,16 +48,14 @@ isEmpty m =
 
 blockItem : Decoder BlockItem
 blockItem =
-    BlockItem
-        <$> "count"
-        := int
-        <+> "id"
-        := int
+    succeed BlockItem
+        |: ("count" := int)
+        |: ("id" := int)
 
 
 decoder : Decoder Model
 decoder =
-    Model <$> blockItem
+   map Model blockItem
 
 
 
@@ -98,13 +97,13 @@ icon realm m =
                 text ""
             else
                 img
-                    [ src
-                        <| ddragon
-                        ++ "/"
-                        ++ Result.withDefault "" (Realm.version realm)
-                        ++ "/img/item/"
-                        ++ toString item.id
-                        ++ ".png"
+                    [ src <|
+                        ddragon
+                            ++ "/"
+                            ++ Result.withDefault "" (Realm.version realm)
+                            ++ "/img/item/"
+                            ++ toString item.id
+                            ++ ".png"
                     , alt ""
                     ]
                     []

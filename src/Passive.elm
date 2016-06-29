@@ -17,6 +17,7 @@ import Json.Decode exposing (..)
 import Image
 import Realm
 import Result
+import Json.Decode.Extra exposing (..)
 
 
 -- MODEL
@@ -33,7 +34,7 @@ type alias Passive =
 type Model
     = Model Passive
     | Empty
-
+ 
 
 empty : Model
 empty =
@@ -52,15 +53,11 @@ isEmpty m =
 
 passive : Decoder Passive
 passive =
-    Passive
-        <$> "description"
-        := string
-        <+> "image"
-        := Image.decoder
-        <+> "name"
-        := string
-        <+> "sanitizedDescription"
-        := string
+    succeed Passive
+        |: ("description" := string)
+        |: ("image" := Image.decoder)
+        |: ("name" := string)
+        |: ("sanitizedDescription" := string)
 
 
 decoder : Decoder Model
@@ -107,18 +104,14 @@ icon realm m =
                 text ""
             else
                 img
-                    [ src
-                        <|
-                            ddragon
-                        ++
-                            "/"
-                        ++
-                            Result.withDefault "" (Realm.version realm)
-                        -- should never default
-                        ++
-                            "/img/passive/"
-                        ++
-                            Result.withDefault "" (Image.full passive.image)
+                    [ src <|
+                        ddragon
+                            ++ "/"
+                            ++ Result.withDefault "" (Realm.version realm)
+                            -- should never default
+                            ++
+                                "/img/passive/"
+                            ++ Result.withDefault "" (Image.full passive.image)
                     , alt passive.name
                     ]
                     []

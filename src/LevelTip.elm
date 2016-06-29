@@ -10,6 +10,7 @@ module LevelTip
 
 import Json.Decode exposing (..)
 import Core exposing (..)
+import Json.Decode.Extra exposing (..)
 
 
 -- MODEL
@@ -43,11 +44,9 @@ isEmpty m =
 
 levelTip : Decoder LevelTip
 levelTip =
-    LevelTip
-        <$> "effect"
-        := list string
-        <+> "label"
-        := list string
+    succeed LevelTip
+        |: ("effect" := list string)
+        |: ("label" := list string)
 
 
 decoder : Decoder Model
@@ -55,7 +54,7 @@ decoder =
     map Model levelTip
 
 
- 
+
 -- ACCESSORS
 
 

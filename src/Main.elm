@@ -19,6 +19,7 @@ import Dict
 import Result exposing (andThen)
 import List
 
+
 main : Program Never
 main =
     Html.App.program
@@ -89,12 +90,17 @@ update message model =
             ( { model | full = False }, Cmd.none )
 
         NewRealm new ->
-            if Realm.isEmpty new then 
+            if Realm.isEmpty new then
                 ( model, Cmd.none )
             else
-                ( { model | realm = new }, if Champion.isEmpty model.champion then Task.perform Fail Succeed <| Request.Static.getChampionById model.static 1 else Cmd.none)
+                ( { model | realm = new }
+                , if Champion.isEmpty model.champion then
+                    Task.perform Fail Succeed <| Request.Static.getChampionById model.static 1
+                  else
+                    Cmd.none
+                )
 
- 
+
 
 -- VIEW
 
@@ -151,9 +157,9 @@ viewSelect { all } =
         keys =
             Result.withDefault Dict.empty <| ChampionList.keys all
     in
-        select [ onInput Search ]
-            <| List.map (\( x, y ) -> option [ value x ] [ text y ])
-            <| Dict.toList keys
+        select [ onInput Search ] <|
+            List.map (\( x, y ) -> option [ value x ] [ text y ]) <|
+                Dict.toList keys
 
 
 viewChampion : Model -> Html Msg
@@ -172,57 +178,59 @@ viewChampion model =
 
 viewHeading : List (Attribute Msg) -> Model -> Html Msg
 viewHeading attr { champion } =
-    Result.withDefault (text "")
-        <| andThen (Champion.name champion)
-        <| \name ->
-            andThen (Champion.title champion)
-                <| \title ->
-                    Ok
-                        <| span attr [ h1 [] [ text name ], h3 [] [ text title ] ]
+    Result.withDefault (text "") <|
+        andThen (Champion.name champion) <|
+            \name ->
+                andThen (Champion.title champion) <|
+                    \title ->
+                        Ok <|
+                            span attr [ h1 [] [ text name ], h3 [] [ text title ] ]
 
 
 viewLore : List (Attribute Msg) -> Model -> Html Msg
 viewLore attr { champion } =
-    Result.withDefault (text "")
-        <| andThen (Champion.lore champion)
-        <| \lore ->
-            Ok
-                <| span attr
-                    [ text lore
-                    , br [] []
-                    , button [ onClick Blurb ] [ text "hide lore" ]
-                    ]
- 
+    Result.withDefault (text "") <|
+        andThen (Champion.lore champion) <|
+            \lore ->
+                Ok <|
+                    span attr
+                        [ text lore
+                        , br [] []
+                        , button [ onClick Blurb ] [ text "hide lore" ]
+                        ]
+
 
 viewBlurb : List (Attribute Msg) -> Model -> Html Msg
 viewBlurb attr { champion } =
-    Result.withDefault (text "")
-        <| andThen (Champion.blurb champion)
-        <| \blurb ->
-            Ok
-                <| span attr
-                    [ text blurb
-                    , br [] []
-                    , button [ onClick Full ] [ text "show full lore" ]
-                    ]
+    Result.withDefault (text "") <|
+        andThen (Champion.blurb champion) <|
+            \blurb ->
+                Ok <|
+                    span attr
+                        [ text blurb
+                        , br [] []
+                        , button [ onClick Full ] [ text "show full lore" ]
+                        ]
 
 
 viewPassive : Model -> Html Msg
 viewPassive { champion, realm } =
-    Result.withDefault (text "")
-        <| andThen (Champion.passive champion)
-        <| \passive ->
-            andThen (Passive.description passive)
-                <| \description ->
-                    Ok <| span [ title description ] [ Passive.icon realm passive ]
+    Result.withDefault (text "") <|
+        andThen (Champion.passive champion) <|
+            \passive ->
+                andThen (Passive.description passive) <|
+                    \description ->
+                        Ok <| span [ title description ] [ Passive.icon realm passive ]
+
 
 viewOneSpell : Realm.Model -> Spell.Model -> Html Msg
 viewOneSpell realm spell =
-    span [title <| Result.withDefault "" <| Spell.description spell] [Spell.icon realm spell]
+    span [ title <| Result.withDefault "" <| Spell.description spell ] [ Spell.icon realm spell ]
+
 
 viewSpells : Model -> Html Msg
-viewSpells {champion, realm} =
-    Result.withDefault (text "")
-        <| andThen (Champion.spells champion)
-        <| \spells ->
-            Ok <| span [] <| List.map (viewOneSpell realm) spells
+viewSpells { champion, realm } =
+    Result.withDefault (text "") <|
+        andThen (Champion.spells champion) <|
+            \spells ->
+                Ok <| span [] <| List.map (viewOneSpell realm) spells

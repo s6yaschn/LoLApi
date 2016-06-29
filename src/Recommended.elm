@@ -19,6 +19,7 @@ import Item
 import Json.Decode exposing (..)
 import List
 import Realm
+import Json.Decode.Extra exposing (..)
 
 
 -- MODEL
@@ -59,41 +60,21 @@ isEmpty m =
 
 recommended : Decoder Recommended
 recommended =
-    Recommended
-        <$>
-            "blocks"
-        :=
-            list Block.decoder
-        <+>
-            "champion"
-        :=
-            string
-        <+>
-            "map"
-        :=
-            string
-        <+>
-            "mode"
-        :=
-            string
-        <+>
-            oneOf [ "priority" := bool, succeed False ]
-        -- not always included, default to False
-        <+>
-            "title"
-        :=
-            string
-        <+>
-            "type"
-        :=
-            string
+    succeed Recommended
+        |: ("blocks" := list Block.decoder)
+        |: ("champion" := string)
+        |: ("map" := string)
+        |: ("mode" := string)
+        |: withDefault False ("priority" := bool)
+        |: ("title" := string)
+        |: ("type" := string)
 
 
 decoder : Decoder Model
 decoder =
     Json.Decode.map Model recommended
 
-
+ 
 
 -- ACCESSORS
 
@@ -165,12 +146,12 @@ view realm m =
                 let
                     f : Block.Model -> Html a
                     f x =
-                        div []
-                            <| [ h3 [] [ text <| Result.withDefault "" (Block.typ' x) ]
-                               , br [] []
-                               ]
-                            ++ List.map (Item.icon realm) (Result.withDefault [] (Block.items x))
+                        div [] <|
+                            [ h3 [] [ text <| Result.withDefault "" (Block.typ' x) ]
+                            , br [] []
+                            ]
+                                ++ List.map (Item.icon realm) (Result.withDefault [] (Block.items x))
                 in
-                    div []
-                        <| h1 [] [ text recommended.typ ]
-                        :: List.map f recommended.blocks
+                    div [] <|
+                        h1 [] [ text recommended.typ ]
+                            :: List.map f recommended.blocks

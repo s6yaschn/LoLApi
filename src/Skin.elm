@@ -11,6 +11,7 @@ module Skin
 
 import Json.Decode exposing (..)
 import Core exposing (..)
+import Json.Decode.Extra exposing (..)
 
 
 -- MODEL
@@ -45,13 +46,10 @@ isEmpty m =
 
 skin : Decoder Skin
 skin =
-    Skin
-        <$> "id"
-        := int
-        <+> "name"
-        := string
-        <+> "num"
-        := int
+    succeed Skin
+        |: ("id" := int)
+        |: ("name" := string)
+        |: ("num" := int)
 
 
 decoder : Decoder Model

@@ -13,6 +13,7 @@ import Html.Attributes exposing (..)
 import Core exposing (..)
 import Json.Decode exposing (..)
 import Realm
+import Json.Decode.Extra exposing (..)
 
 
 -- MODEL
@@ -37,7 +38,7 @@ isEmpty m =
         _ ->
             False
 
- 
+
 type alias Image =
     { full : String
     , group : String
@@ -51,22 +52,15 @@ type alias Image =
 
 image : Decoder Image
 image =
-    Image
-        <$> "full"
-        := string
-        <+> "group"
-        := string
-        <+> "h"
-        := int
-        <+> "sprite"
-        := string
-        <+> "w"
-        := int
-        <+> "x"
-        := int
-        <+> "y"
-        := int
-
+    succeed Image
+        |: ("full" := string)
+        |: ("group" := string)
+        |: ("h" := int)
+        |: ("sprite" := string)
+        |: ("w" := int)
+        |: ("x" := int)
+        |: ("y" := int)
+ 
 
 decoder : Decoder Model
 decoder =

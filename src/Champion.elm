@@ -41,6 +41,7 @@ import Skin
 import Stats
 import Passive
 import Regex exposing (..)
+import Json.Decode.Extra exposing (..)
 
 
 -- MODEL
@@ -69,79 +70,29 @@ type alias Champion =
     , stats : Stats.Model
     , tags : List String
     , title : String
-    }
+    } 
 
 
 champion : Decoder Champion
 champion =
-    Champion
-        <$>
-            "allytips"
-        :=
-            list string
-        <+>
-            "blurb"
-        :=
-            string
-        <+>
-            "enemytips"
-        :=
-            list string
-        <+>
-            "id"
-        :=
-            int
-        <+>
-            "image"
-        :=
-            Image.decoder
-        <+>
-            "info"
-        :=
-            Info.decoder
-        <+>
-            "key"
-        :=
-            string
-        <+>
-            map break ("lore" := string)
-        -- parse line breaks in returned html
-        <+>
-            "name"
-        :=
-            string
-        <+>
-            "partype"
-        :=
-            string
-        <+>
-            "passive"
-        :=
-            Passive.decoder
-        <+>
-            "recommended"
-        :=
-            list Recommended.decoder
-        <+>
-            "skins"
-        :=
-            list Skin.decoder
-        <+>
-            "spells"
-        :=
-            list Spell.decoder
-        <+>
-            "stats"
-        :=
-            Stats.decoder
-        <+>
-            "tags"
-        :=
-            list string
-        <+>
-            "title"
-        :=
-            string
+    succeed Champion
+        |: ("allytips" := list string)
+        |: ("blurb" := string)
+        |: ("enemytips" := list string)
+        |: ("id" := int)
+        |: ("image" := Image.decoder)
+        |: ("info" := Info.decoder)
+        |: ("key" := string)
+        |: map break ("lore" := string)
+        |: ("name" := string)
+        |: ("partype" := string)
+        |: ("passive" := Passive.decoder)
+        |: ("recommended" := list Recommended.decoder)
+        |: ("skins" := list Skin.decoder)
+        |: ("spells" := list Spell.decoder)
+        |: ("stats" := Stats.decoder)
+        |: ("tags" := list string)
+        |: ("title" := string)
 
 
 decoder : Decoder Model
@@ -368,17 +319,17 @@ skinSplashArt id m =
                     validSkin id model
             in
                 img
-                    [ src
-                        <| ddragon
-                        ++ "/img/champion/splash/"
-                        ++ model.key
-                        ++ "_"
-                        ++ (if valid then
-                                toString id
-                            else
-                                "0"
-                           )
-                        ++ ".jpg"
+                    [ src <|
+                        ddragon
+                            ++ "/img/champion/splash/"
+                            ++ model.key
+                            ++ "_"
+                            ++ (if valid then
+                                    toString id
+                                else
+                                    "0"
+                               )
+                            ++ ".jpg"
                     , alt model.name
                     ]
                     []
@@ -406,17 +357,17 @@ skinLoadingScreen id m =
                     validSkin id model
             in
                 img
-                    [ src
-                        <| ddragon
-                        ++ "/img/champion/loading/"
-                        ++ model.key
-                        ++ "_"
-                        ++ (if valid then
-                                toString id
-                            else
-                                "0"
-                           )
-                        ++ ".jpg"
+                    [ src <|
+                        ddragon
+                            ++ "/img/champion/loading/"
+                            ++ model.key
+                            ++ "_"
+                            ++ (if valid then
+                                    toString id
+                                else
+                                    "0"
+                               )
+                            ++ ".jpg"
                     , alt model.name
                     ]
                     []
@@ -438,13 +389,13 @@ icon r m =
                 text ""
             else
                 img
-                    [ src
-                        <| ddragon
-                        ++ "/"
-                        ++ Result.withDefault "" (Realm.version r)
-                        ++ "/img/champion/"
-                        ++ key
-                        ++ ".png"
+                    [ src <|
+                        ddragon
+                            ++ "/"
+                            ++ Result.withDefault "" (Realm.version r)
+                            ++ "/img/champion/"
+                            ++ key
+                            ++ ".png"
                     ]
                     []
 
@@ -455,7 +406,16 @@ icon r m =
 
 validSkin : Int -> Champion -> Bool
 validSkin id champ =
-    not <| List.isEmpty <| List.filter (\x -> Result.withDefault -1 (Skin.num x) == id) champ.skins
+    List.any
+        (\x ->
+            case Skin.num x of
+                Err _ ->
+                    False
+
+                Ok nr ->
+                    nr == id
+        )
+        champ.skins
 
 
 break : String -> String

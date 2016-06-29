@@ -12,6 +12,7 @@ module ChampionInfo
 
 import Json.Decode exposing (..)
 import Core exposing (..)
+import Json.Decode.Extra exposing (..)
 
 
 -- MODEL
@@ -47,22 +48,18 @@ isEmpty m =
 
 info : Decoder Info
 info =
-    Info
-        <$> "attack"
-        := int
-        <+> "defense"
-        := int
-        <+> "difficulty"
-        := int
-        <+> "magic"
-        := int
+    succeed Info
+        |: ("attack" := int)
+        |: ("defense" := int)
+        |: ("difficulty" := int)
+        |: ("magic" := int)
 
 
 decoder : Decoder Model
 decoder =
     map Model info
 
-
+ 
 
 -- ACCESSORS
 

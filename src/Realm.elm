@@ -11,6 +11,7 @@ module Realm
 import Json.Decode exposing (..)
 import Dict exposing (Dict)
 import Core exposing (..)
+import Json.Decode.Extra exposing (..)
 
 
 -- MODEL
@@ -28,7 +29,7 @@ type alias Realm =
     , v : String
     }
 
- 
+
 type Model
     = Model Realm
     | Empty
@@ -51,42 +52,16 @@ isEmpty m =
 
 realm : Decoder Realm
 realm =
-    Realm
-        <$>
-            "cdn"
-        :=
-            string
-        <+>
-            "css"
-        :=
-            string
-        <+>
-            "dd"
-        :=
-            string
-        <+>
-            "l"
-        :=
-            string
-        <+>
-            "lg"
-        :=
-            string
-        <+>
-            "n"
-        :=
-            dict string
-        <+>
-            "profileiconmax"
-        :=
-            int
-        <+>
-            oneOf [ "store" := string, succeed "" ]
-        -- optional
-        <+>
-            "v"
-        :=
-            string
+    succeed Realm
+        |: ("cdn" := string)
+        |: ("css" := string)
+        |: ("dd" := string)
+        |: ("l" := string)
+        |: ("lg" := string)
+        |: ("n" := dict string)
+        |: ("profileiconmax" := int)
+        |: withDefault "" ("store" := string)
+        |: ("v" := string)
 
 
 decoder : Decoder Model
