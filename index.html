@@ -1,0 +1,23 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <script type="text/javascript" src="main.js"></script>
+    </head>
+    <body>
+         <script type="text/javascript">
+            var hash = window.location.hash.substr(1);
+            var query = window.location.search.split('key=')[1];
+            var key= "";
+            if (hash) {
+                key = hash
+            } else if (query) {
+                key = query
+            };
+            Elm.Main.fullscreen(                {
+                    key: key
+                }
+            )
+         </script>
+    </body>
+</html>

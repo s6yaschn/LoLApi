@@ -19,10 +19,13 @@ import Dict
 import Result exposing (andThen)
 import List
 
+type alias Flags =
+    { key: String 
+    }
 
-main : Program Never
+main : Program Flags
 main =
-    Html.App.program
+    Html.App.programWithFlags
         { init = init
         , update = update
         , view = view
@@ -36,6 +39,7 @@ type alias Model =
     , all : ChampionList.Model
     , full : Bool
     , realm : Realm.Model
+    , currentSkin : Int
     }
 
 
@@ -52,11 +56,14 @@ type Msg
     | Full
     | Blurb
     | NewRealm Realm.Model
+    | PreviousSkin
+    | NextSkin
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
     case message of
+        -- TODO: remove redundancy due to flags
         NewKey key ->
             ( { model | static = Request.Static.new Endpoint.euw key }, Task.perform Fail Init <| Request.Static.getAllChampions <| Request.Static.new Endpoint.euw key )
 
@@ -67,11 +74,11 @@ update message model =
             in
                 ( model, Task.perform Fail Succeed <| Request.Static.getChampionById model.static id )
 
-        Fail _ ->
+        Fail err -> Debug.log (toString err) <|
             ( model, Cmd.none )
 
         Succeed champ ->
-            ( { model | champion = champ }, Cmd.none )
+            ( { model | champion = champ, currentSkin = 0 }, Cmd.none )
 
         Init new ->
             let
@@ -100,23 +107,49 @@ update message model =
                     Cmd.none
                 )
 
+        NextSkin ->
+            let
+                old =
+                    model.currentSkin
+
+                max =
+                    Result.withDefault 0 <| Result.map List.length (Champion.skins model.champion)
+            in
+                if old >= max - 1 then
+                    ( model, Cmd.none )
+                else
+                    ( { model | currentSkin = old + 1 }, Cmd.none )
+
+        PreviousSkin ->
+            let
+                old =
+                    model.currentSkin
+            in
+                if old <= 0 then
+                    ( model, Cmd.none )
+                else
+                    ( { model | currentSkin = old - 1 }, Cmd.none )
+
 
 
 -- VIEW
 
 
 view : Model -> Html Msg
-view model =
+view ({all} as model) =
     div []
-        [ input
+        [  if ChampionList.isEmpty all then
+            input
             [ placeholder "enter API key"
             , onInput NewKey
             ]
             []
-        , if ChampionList.isEmpty model.all then
-            text ""
           else
-            viewSelect model
+            span []
+                [ viewSelect model
+                , button [ onClick PreviousSkin ] [ text "previous skin" ]
+                , button [ onClick NextSkin ] [ text "nextSkin" ]
+                ]
         , br [] []
         , viewChampion model
         ]
@@ -135,15 +168,16 @@ subscriptions model =
 -- INIT
 
 
-init : ( Model, Cmd Msg )
-init =
-    ( { static = Request.Static.new Endpoint.euw ""
+init : Flags -> ( Model, Cmd Msg )
+init {key} = Debug.log key <|
+    ( { static = Request.Static.new Endpoint.euw key
       , champion = Champion.empty
       , all = ChampionList.empty
       , full = False
       , realm = Realm.empty
+      , currentSkin = 0
       }
-    , Cmd.none
+    , Task.perform Fail NewKey <| Task.succeed key
     )
 
 
@@ -173,6 +207,8 @@ viewChampion model =
         , br [] []
         , viewPassive model
         , viewSpells model
+        , br [] []
+        , viewSkin model
         ]
 
 
@@ -234,3 +270,8 @@ viewSpells { champion, realm } =
         andThen (Champion.spells champion) <|
             \spells ->
                 Ok <| span [] <| List.map (viewOneSpell realm) spells
+
+
+viewSkin : Model -> Html Msg
+viewSkin { champion, currentSkin } =
+    Champion.skinSplashArt currentSkin champion
