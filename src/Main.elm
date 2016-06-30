@@ -18,6 +18,7 @@ import Http
 import Dict
 import Result exposing (andThen)
 import List
+import Json.Decode as Json
 
 
 type alias Flags =
@@ -144,7 +145,7 @@ view ({ all } as model) =
         [ if ChampionList.isEmpty all then
             input
                 [ placeholder "enter API key"
-                , onInput NewKey
+                , onChange NewKey
                 ]
                 []
           else
@@ -187,13 +188,18 @@ init { key } =
 -- helper functions
 
 
+onChange : (String -> msg) -> Attribute msg
+onChange tagger =
+    on "change" (Json.map tagger targetValue)
+
+
 viewSelect : Model -> Html Msg
 viewSelect { all } =
     let
         keys =
             Result.withDefault Dict.empty <| ChampionList.keys all
     in
-        select [ onInput Search ] <|
+        select [ onChange Search ] <|
             List.map (\( x, y ) -> option [ value x ] [ text y ]) <|
                 Dict.toList keys
 
