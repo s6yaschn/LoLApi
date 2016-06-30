@@ -10723,6 +10723,12 @@ var _user$project$Main$viewHeading = F2(
 						});
 				}));
 	});
+var _user$project$Main$onChange = function (tagger) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'change',
+		A2(_elm_lang$core$Json_Decode$map, tagger, _elm_lang$html$Html_Events$targetValue));
+};
 var _user$project$Main$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$none;
 };
@@ -10988,7 +10994,7 @@ var _user$project$Main$viewSelect = function (_p16) {
 		_elm_lang$html$Html$select,
 		_elm_lang$core$Native_List.fromArray(
 			[
-				_elm_lang$html$Html_Events$onInput(_user$project$Main$Search)
+				_user$project$Main$onChange(_user$project$Main$Search)
 			]),
 		A2(
 			_elm_lang$core$List$map,
@@ -11024,7 +11030,7 @@ var _user$project$Main$view = function (_p20) {
 				_elm_lang$core$Native_List.fromArray(
 					[
 						_elm_lang$html$Html_Attributes$placeholder('enter API key'),
-						_elm_lang$html$Html_Events$onInput(_user$project$Main$NewKey)
+						_user$project$Main$onChange(_user$project$Main$NewKey)
 					]),
 				_elm_lang$core$Native_List.fromArray(
 					[])) : A2(
@@ -11068,23 +11074,15 @@ var _user$project$Main$init = function (_p23) {
 	var _p24 = _p23;
 	var _p25 = _p24.key;
 	return A2(
-		_elm_lang$core$Debug$log,
-		_p25,
+		_user$project$Main$update,
+		_user$project$Main$NewKey(_p25),
 		{
-			ctor: '_Tuple2',
-			_0: {
-				$static: A2(_user$project$Request_Static$new, _user$project$Endpoint$euw, _p25),
-				champion: _user$project$Champion$empty,
-				all: _user$project$ChampionList$empty,
-				full: false,
-				realm: _user$project$Realm$empty,
-				currentSkin: 0
-			},
-			_1: A3(
-				_elm_lang$core$Task$perform,
-				_user$project$Main$Fail,
-				_user$project$Main$NewKey,
-				_elm_lang$core$Task$succeed(_p25))
+			$static: A2(_user$project$Request_Static$new, _user$project$Endpoint$euw, _p25),
+			champion: _user$project$Champion$empty,
+			all: _user$project$ChampionList$empty,
+			full: false,
+			realm: _user$project$Realm$empty,
+			currentSkin: 0
 		});
 };
 var _user$project$Main$main = {
