@@ -19,9 +19,11 @@ import Dict
 import Result exposing (andThen)
 import List
 
+
 type alias Flags =
-    { key: String 
+    { key : String
     }
+
 
 main : Program Flags
 main =
@@ -74,8 +76,9 @@ update message model =
             in
                 ( model, Task.perform Fail Succeed <| Request.Static.getChampionById model.static id )
 
-        Fail err -> Debug.log (toString err) <|
-            ( model, Cmd.none )
+        Fail err ->
+            Debug.log (toString err) <|
+                ( model, Cmd.none )
 
         Succeed champ ->
             ( { model | champion = champ, currentSkin = 0 }, Cmd.none )
@@ -136,14 +139,14 @@ update message model =
 
 
 view : Model -> Html Msg
-view ({all} as model) =
+view ({ all } as model) =
     div []
-        [  if ChampionList.isEmpty all then
+        [ if ChampionList.isEmpty all then
             input
-            [ placeholder "enter API key"
-            , onInput NewKey
-            ]
-            []
+                [ placeholder "enter API key"
+                , onInput NewKey
+                ]
+                []
           else
             span []
                 [ viewSelect model
@@ -169,16 +172,15 @@ subscriptions model =
 
 
 init : Flags -> ( Model, Cmd Msg )
-init {key} = Debug.log key <|
-    ( { static = Request.Static.new Endpoint.euw key
-      , champion = Champion.empty
-      , all = ChampionList.empty
-      , full = False
-      , realm = Realm.empty
-      , currentSkin = 0
-      }
-    , Task.perform Fail NewKey <| Task.succeed key
-    )
+init { key } =
+    update (NewKey key)
+        { static = Request.Static.new Endpoint.euw key
+        , champion = Champion.empty
+        , all = ChampionList.empty
+        , full = False
+        , realm = Realm.empty
+        , currentSkin = 0
+        }
 
 
 
