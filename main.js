@@ -6302,140 +6302,1013 @@ var _elm_community$json_extra$Json_Decode_Extra$apply = _elm_lang$core$Json_Deco
 var _elm_community$json_extra$Json_Decode_Extra_ops = _elm_community$json_extra$Json_Decode_Extra_ops || {};
 _elm_community$json_extra$Json_Decode_Extra_ops['|:'] = _elm_community$json_extra$Json_Decode_Extra$apply;
 
-//import Maybe, Native.List //
-
-var _elm_lang$core$Native_Regex = function() {
-
-function escape(str)
-{
-	return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-}
-function caseInsensitive(re)
-{
-	return new RegExp(re.source, 'gi');
-}
-function regex(raw)
-{
-	return new RegExp(raw, 'g');
-}
-
-function contains(re, string)
-{
-	return string.match(re) !== null;
-}
-
-function find(n, re, str)
-{
-	n = n.ctor === 'All' ? Infinity : n._0;
-	var out = [];
-	var number = 0;
-	var string = str;
-	var lastIndex = re.lastIndex;
-	var prevLastIndex = -1;
-	var result;
-	while (number++ < n && (result = re.exec(string)))
-	{
-		if (prevLastIndex === re.lastIndex) break;
-		var i = result.length - 1;
-		var subs = new Array(i);
-		while (i > 0)
-		{
-			var submatch = result[i];
-			subs[--i] = submatch === undefined
-				? _elm_lang$core$Maybe$Nothing
-				: _elm_lang$core$Maybe$Just(submatch);
-		}
-		out.push({
-			match: result[0],
-			submatches: _elm_lang$core$Native_List.fromArray(subs),
-			index: result.index,
-			number: number
-		});
-		prevLastIndex = re.lastIndex;
-	}
-	re.lastIndex = lastIndex;
-	return _elm_lang$core$Native_List.fromArray(out);
-}
-
-function replace(n, re, replacer, string)
-{
-	n = n.ctor === 'All' ? Infinity : n._0;
-	var count = 0;
-	function jsReplacer(match)
-	{
-		if (count++ >= n)
-		{
-			return match;
-		}
-		var i = arguments.length - 3;
-		var submatches = new Array(i);
-		while (i > 0)
-		{
-			var submatch = arguments[i];
-			submatches[--i] = submatch === undefined
-				? _elm_lang$core$Maybe$Nothing
-				: _elm_lang$core$Maybe$Just(submatch);
-		}
-		return replacer({
-			match: match,
-			submatches: _elm_lang$core$Native_List.fromArray(submatches),
-			index: arguments[i - 1],
-			number: count
-		});
-	}
-	return string.replace(re, jsReplacer);
-}
-
-function split(n, re, str)
-{
-	n = n.ctor === 'All' ? Infinity : n._0;
-	if (n === Infinity)
-	{
-		return _elm_lang$core$Native_List.fromArray(str.split(re));
-	}
-	var string = str;
-	var result;
-	var out = [];
-	var start = re.lastIndex;
-	while (n--)
-	{
-		if (!(result = re.exec(string))) break;
-		out.push(string.slice(start, result.index));
-		start = re.lastIndex;
-	}
-	out.push(string.slice(start));
-	return _elm_lang$core$Native_List.fromArray(out);
-}
-
-return {
-	regex: regex,
-	caseInsensitive: caseInsensitive,
-	escape: escape,
-
-	contains: F2(contains),
-	find: F3(find),
-	replace: F4(replace),
-	split: F3(split)
-};
-
-}();
-
-var _elm_lang$core$Regex$split = _elm_lang$core$Native_Regex.split;
-var _elm_lang$core$Regex$replace = _elm_lang$core$Native_Regex.replace;
-var _elm_lang$core$Regex$find = _elm_lang$core$Native_Regex.find;
-var _elm_lang$core$Regex$contains = _elm_lang$core$Native_Regex.contains;
-var _elm_lang$core$Regex$caseInsensitive = _elm_lang$core$Native_Regex.caseInsensitive;
-var _elm_lang$core$Regex$regex = _elm_lang$core$Native_Regex.regex;
-var _elm_lang$core$Regex$escape = _elm_lang$core$Native_Regex.escape;
-var _elm_lang$core$Regex$Match = F4(
-	function (a, b, c, d) {
-		return {match: a, submatches: b, index: c, number: d};
+var _elm_community$list_extra$List_Extra$greedyGroupsOfWithStep = F3(
+	function (size, step, xs) {
+		var okayXs = _elm_lang$core$Native_Utils.cmp(
+			_elm_lang$core$List$length(xs),
+			0) > 0;
+		var okayArgs = (_elm_lang$core$Native_Utils.cmp(size, 0) > 0) && (_elm_lang$core$Native_Utils.cmp(step, 0) > 0);
+		var xs$ = A2(_elm_lang$core$List$drop, step, xs);
+		var group = A2(_elm_lang$core$List$take, size, xs);
+		return (okayArgs && okayXs) ? A2(
+			_elm_lang$core$List_ops['::'],
+			group,
+			A3(_elm_community$list_extra$List_Extra$greedyGroupsOfWithStep, size, step, xs$)) : _elm_lang$core$Native_List.fromArray(
+			[]);
 	});
-var _elm_lang$core$Regex$Regex = {ctor: 'Regex'};
-var _elm_lang$core$Regex$AtMost = function (a) {
-	return {ctor: 'AtMost', _0: a};
+var _elm_community$list_extra$List_Extra$greedyGroupsOf = F2(
+	function (size, xs) {
+		return A3(_elm_community$list_extra$List_Extra$greedyGroupsOfWithStep, size, size, xs);
+	});
+var _elm_community$list_extra$List_Extra$groupsOfWithStep = F3(
+	function (size, step, xs) {
+		var okayArgs = (_elm_lang$core$Native_Utils.cmp(size, 0) > 0) && (_elm_lang$core$Native_Utils.cmp(step, 0) > 0);
+		var xs$ = A2(_elm_lang$core$List$drop, step, xs);
+		var group = A2(_elm_lang$core$List$take, size, xs);
+		var okayLength = _elm_lang$core$Native_Utils.eq(
+			size,
+			_elm_lang$core$List$length(group));
+		return (okayArgs && okayLength) ? A2(
+			_elm_lang$core$List_ops['::'],
+			group,
+			A3(_elm_community$list_extra$List_Extra$groupsOfWithStep, size, step, xs$)) : _elm_lang$core$Native_List.fromArray(
+			[]);
+	});
+var _elm_community$list_extra$List_Extra$groupsOf = F2(
+	function (size, xs) {
+		return A3(_elm_community$list_extra$List_Extra$groupsOfWithStep, size, size, xs);
+	});
+var _elm_community$list_extra$List_Extra$zip5 = _elm_lang$core$List$map5(
+	F5(
+		function (v0, v1, v2, v3, v4) {
+			return {ctor: '_Tuple5', _0: v0, _1: v1, _2: v2, _3: v3, _4: v4};
+		}));
+var _elm_community$list_extra$List_Extra$zip4 = _elm_lang$core$List$map4(
+	F4(
+		function (v0, v1, v2, v3) {
+			return {ctor: '_Tuple4', _0: v0, _1: v1, _2: v2, _3: v3};
+		}));
+var _elm_community$list_extra$List_Extra$zip3 = _elm_lang$core$List$map3(
+	F3(
+		function (v0, v1, v2) {
+			return {ctor: '_Tuple3', _0: v0, _1: v1, _2: v2};
+		}));
+var _elm_community$list_extra$List_Extra$zip = _elm_lang$core$List$map2(
+	F2(
+		function (v0, v1) {
+			return {ctor: '_Tuple2', _0: v0, _1: v1};
+		}));
+var _elm_community$list_extra$List_Extra$isPrefixOf = function (prefix) {
+	return function (_p0) {
+		return A2(
+			_elm_lang$core$List$all,
+			_elm_lang$core$Basics$identity,
+			A3(
+				_elm_lang$core$List$map2,
+				F2(
+					function (x, y) {
+						return _elm_lang$core$Native_Utils.eq(x, y);
+					}),
+				prefix,
+				_p0));
+	};
 };
-var _elm_lang$core$Regex$All = {ctor: 'All'};
+var _elm_community$list_extra$List_Extra$isSuffixOf = F2(
+	function (suffix, xs) {
+		return A2(
+			_elm_community$list_extra$List_Extra$isPrefixOf,
+			_elm_lang$core$List$reverse(suffix),
+			_elm_lang$core$List$reverse(xs));
+	});
+var _elm_community$list_extra$List_Extra$selectSplit = function (xs) {
+	var _p1 = xs;
+	if (_p1.ctor === '[]') {
+		return _elm_lang$core$Native_List.fromArray(
+			[]);
+	} else {
+		var _p5 = _p1._1;
+		var _p4 = _p1._0;
+		return A2(
+			_elm_lang$core$List_ops['::'],
+			{
+				ctor: '_Tuple3',
+				_0: _elm_lang$core$Native_List.fromArray(
+					[]),
+				_1: _p4,
+				_2: _p5
+			},
+			A2(
+				_elm_lang$core$List$map,
+				function (_p2) {
+					var _p3 = _p2;
+					return {
+						ctor: '_Tuple3',
+						_0: A2(_elm_lang$core$List_ops['::'], _p4, _p3._0),
+						_1: _p3._1,
+						_2: _p3._2
+					};
+				},
+				_elm_community$list_extra$List_Extra$selectSplit(_p5)));
+	}
+};
+var _elm_community$list_extra$List_Extra$select = function (xs) {
+	var _p6 = xs;
+	if (_p6.ctor === '[]') {
+		return _elm_lang$core$Native_List.fromArray(
+			[]);
+	} else {
+		var _p10 = _p6._1;
+		var _p9 = _p6._0;
+		return A2(
+			_elm_lang$core$List_ops['::'],
+			{ctor: '_Tuple2', _0: _p9, _1: _p10},
+			A2(
+				_elm_lang$core$List$map,
+				function (_p7) {
+					var _p8 = _p7;
+					return {
+						ctor: '_Tuple2',
+						_0: _p8._0,
+						_1: A2(_elm_lang$core$List_ops['::'], _p9, _p8._1)
+					};
+				},
+				_elm_community$list_extra$List_Extra$select(_p10)));
+	}
+};
+var _elm_community$list_extra$List_Extra$tailsHelp = F2(
+	function (e, list) {
+		var _p11 = list;
+		if (_p11.ctor === '::') {
+			var _p12 = _p11._0;
+			return A2(
+				_elm_lang$core$List_ops['::'],
+				A2(_elm_lang$core$List_ops['::'], e, _p12),
+				A2(_elm_lang$core$List_ops['::'], _p12, _p11._1));
+		} else {
+			return _elm_lang$core$Native_List.fromArray(
+				[]);
+		}
+	});
+var _elm_community$list_extra$List_Extra$tails = A2(
+	_elm_lang$core$List$foldr,
+	_elm_community$list_extra$List_Extra$tailsHelp,
+	_elm_lang$core$Native_List.fromArray(
+		[
+			_elm_lang$core$Native_List.fromArray(
+			[])
+		]));
+var _elm_community$list_extra$List_Extra$isInfixOf = F2(
+	function (infix, xs) {
+		return A2(
+			_elm_lang$core$List$any,
+			_elm_community$list_extra$List_Extra$isPrefixOf(infix),
+			_elm_community$list_extra$List_Extra$tails(xs));
+	});
+var _elm_community$list_extra$List_Extra$inits = A2(
+	_elm_lang$core$List$foldr,
+	F2(
+		function (e, acc) {
+			return A2(
+				_elm_lang$core$List_ops['::'],
+				_elm_lang$core$Native_List.fromArray(
+					[]),
+				A2(
+					_elm_lang$core$List$map,
+					F2(
+						function (x, y) {
+							return A2(_elm_lang$core$List_ops['::'], x, y);
+						})(e),
+					acc));
+		}),
+	_elm_lang$core$Native_List.fromArray(
+		[
+			_elm_lang$core$Native_List.fromArray(
+			[])
+		]));
+var _elm_community$list_extra$List_Extra$groupWhileTransitively = F2(
+	function (cmp, xs$) {
+		var _p13 = xs$;
+		if (_p13.ctor === '[]') {
+			return _elm_lang$core$Native_List.fromArray(
+				[]);
+		} else {
+			if (_p13._1.ctor === '[]') {
+				return _elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$core$Native_List.fromArray(
+						[_p13._0])
+					]);
+			} else {
+				var _p15 = _p13._0;
+				var _p14 = A2(_elm_community$list_extra$List_Extra$groupWhileTransitively, cmp, _p13._1);
+				if (_p14.ctor === '::') {
+					return A2(cmp, _p15, _p13._1._0) ? A2(
+						_elm_lang$core$List_ops['::'],
+						A2(_elm_lang$core$List_ops['::'], _p15, _p14._0),
+						_p14._1) : A2(
+						_elm_lang$core$List_ops['::'],
+						_elm_lang$core$Native_List.fromArray(
+							[_p15]),
+						_p14);
+				} else {
+					return _elm_lang$core$Native_List.fromArray(
+						[]);
+				}
+			}
+		}
+	});
+var _elm_community$list_extra$List_Extra$stripPrefix = F2(
+	function (prefix, xs) {
+		var step = F2(
+			function (e, m) {
+				var _p16 = m;
+				if (_p16.ctor === 'Nothing') {
+					return _elm_lang$core$Maybe$Nothing;
+				} else {
+					if (_p16._0.ctor === '[]') {
+						return _elm_lang$core$Maybe$Nothing;
+					} else {
+						return _elm_lang$core$Native_Utils.eq(e, _p16._0._0) ? _elm_lang$core$Maybe$Just(_p16._0._1) : _elm_lang$core$Maybe$Nothing;
+					}
+				}
+			});
+		return A3(
+			_elm_lang$core$List$foldl,
+			step,
+			_elm_lang$core$Maybe$Just(xs),
+			prefix);
+	});
+var _elm_community$list_extra$List_Extra$dropWhileEnd = function (p) {
+	return A2(
+		_elm_lang$core$List$foldr,
+		F2(
+			function (x, xs) {
+				return (p(x) && _elm_lang$core$List$isEmpty(xs)) ? _elm_lang$core$Native_List.fromArray(
+					[]) : A2(_elm_lang$core$List_ops['::'], x, xs);
+			}),
+		_elm_lang$core$Native_List.fromArray(
+			[]));
+};
+var _elm_community$list_extra$List_Extra$takeWhileEnd = function (p) {
+	var step = F2(
+		function (x, _p17) {
+			var _p18 = _p17;
+			var _p19 = _p18._0;
+			return (p(x) && _p18._1) ? {
+				ctor: '_Tuple2',
+				_0: A2(_elm_lang$core$List_ops['::'], x, _p19),
+				_1: true
+			} : {ctor: '_Tuple2', _0: _p19, _1: false};
+		});
+	return function (_p20) {
+		return _elm_lang$core$Basics$fst(
+			A3(
+				_elm_lang$core$List$foldr,
+				step,
+				{
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_List.fromArray(
+						[]),
+					_1: true
+				},
+				_p20));
+	};
+};
+var _elm_community$list_extra$List_Extra$splitAt = F2(
+	function (n, xs) {
+		return {
+			ctor: '_Tuple2',
+			_0: A2(_elm_lang$core$List$take, n, xs),
+			_1: A2(_elm_lang$core$List$drop, n, xs)
+		};
+	});
+var _elm_community$list_extra$List_Extra$unfoldr = F2(
+	function (f, seed) {
+		var _p21 = f(seed);
+		if (_p21.ctor === 'Nothing') {
+			return _elm_lang$core$Native_List.fromArray(
+				[]);
+		} else {
+			return A2(
+				_elm_lang$core$List_ops['::'],
+				_p21._0._0,
+				A2(_elm_community$list_extra$List_Extra$unfoldr, f, _p21._0._1));
+		}
+	});
+var _elm_community$list_extra$List_Extra$scanr1 = F2(
+	function (f, xs$) {
+		var _p22 = xs$;
+		if (_p22.ctor === '[]') {
+			return _elm_lang$core$Native_List.fromArray(
+				[]);
+		} else {
+			if (_p22._1.ctor === '[]') {
+				return _elm_lang$core$Native_List.fromArray(
+					[_p22._0]);
+			} else {
+				var _p23 = A2(_elm_community$list_extra$List_Extra$scanr1, f, _p22._1);
+				if (_p23.ctor === '::') {
+					return A2(
+						_elm_lang$core$List_ops['::'],
+						A2(f, _p22._0, _p23._0),
+						_p23);
+				} else {
+					return _elm_lang$core$Native_List.fromArray(
+						[]);
+				}
+			}
+		}
+	});
+var _elm_community$list_extra$List_Extra$scanr = F3(
+	function (f, acc, xs$) {
+		var _p24 = xs$;
+		if (_p24.ctor === '[]') {
+			return _elm_lang$core$Native_List.fromArray(
+				[acc]);
+		} else {
+			var _p25 = A3(_elm_community$list_extra$List_Extra$scanr, f, acc, _p24._1);
+			if (_p25.ctor === '::') {
+				return A2(
+					_elm_lang$core$List_ops['::'],
+					A2(f, _p24._0, _p25._0),
+					_p25);
+			} else {
+				return _elm_lang$core$Native_List.fromArray(
+					[]);
+			}
+		}
+	});
+var _elm_community$list_extra$List_Extra$scanl1 = F2(
+	function (f, xs$) {
+		var _p26 = xs$;
+		if (_p26.ctor === '[]') {
+			return _elm_lang$core$Native_List.fromArray(
+				[]);
+		} else {
+			return A3(_elm_lang$core$List$scanl, f, _p26._0, _p26._1);
+		}
+	});
+var _elm_community$list_extra$List_Extra$foldr1 = F2(
+	function (f, xs) {
+		var mf = F2(
+			function (x, m) {
+				return _elm_lang$core$Maybe$Just(
+					function () {
+						var _p27 = m;
+						if (_p27.ctor === 'Nothing') {
+							return x;
+						} else {
+							return A2(f, x, _p27._0);
+						}
+					}());
+			});
+		return A3(_elm_lang$core$List$foldr, mf, _elm_lang$core$Maybe$Nothing, xs);
+	});
+var _elm_community$list_extra$List_Extra$foldl1 = F2(
+	function (f, xs) {
+		var mf = F2(
+			function (x, m) {
+				return _elm_lang$core$Maybe$Just(
+					function () {
+						var _p28 = m;
+						if (_p28.ctor === 'Nothing') {
+							return x;
+						} else {
+							return A2(f, _p28._0, x);
+						}
+					}());
+			});
+		return A3(_elm_lang$core$List$foldl, mf, _elm_lang$core$Maybe$Nothing, xs);
+	});
+var _elm_community$list_extra$List_Extra$interweaveHelp = F3(
+	function (l1, l2, acc) {
+		interweaveHelp:
+		while (true) {
+			var _p29 = {ctor: '_Tuple2', _0: l1, _1: l2};
+			_v17_1:
+			do {
+				if (_p29._0.ctor === '::') {
+					if (_p29._1.ctor === '::') {
+						var _v18 = _p29._0._1,
+							_v19 = _p29._1._1,
+							_v20 = A2(
+							_elm_lang$core$Basics_ops['++'],
+							acc,
+							_elm_lang$core$Native_List.fromArray(
+								[_p29._0._0, _p29._1._0]));
+						l1 = _v18;
+						l2 = _v19;
+						acc = _v20;
+						continue interweaveHelp;
+					} else {
+						break _v17_1;
+					}
+				} else {
+					if (_p29._1.ctor === '[]') {
+						break _v17_1;
+					} else {
+						return A2(_elm_lang$core$Basics_ops['++'], acc, _p29._1);
+					}
+				}
+			} while(false);
+			return A2(_elm_lang$core$Basics_ops['++'], acc, _p29._0);
+		}
+	});
+var _elm_community$list_extra$List_Extra$interweave = F2(
+	function (l1, l2) {
+		return A3(
+			_elm_community$list_extra$List_Extra$interweaveHelp,
+			l1,
+			l2,
+			_elm_lang$core$Native_List.fromArray(
+				[]));
+	});
+var _elm_community$list_extra$List_Extra$permutations = function (xs$) {
+	var _p30 = xs$;
+	if (_p30.ctor === '[]') {
+		return _elm_lang$core$Native_List.fromArray(
+			[
+				_elm_lang$core$Native_List.fromArray(
+				[])
+			]);
+	} else {
+		var f = function (_p31) {
+			var _p32 = _p31;
+			return A2(
+				_elm_lang$core$List$map,
+				F2(
+					function (x, y) {
+						return A2(_elm_lang$core$List_ops['::'], x, y);
+					})(_p32._0),
+				_elm_community$list_extra$List_Extra$permutations(_p32._1));
+		};
+		return A2(
+			_elm_lang$core$List$concatMap,
+			f,
+			_elm_community$list_extra$List_Extra$select(_p30));
+	}
+};
+var _elm_community$list_extra$List_Extra$isPermutationOf = F2(
+	function (permut, xs) {
+		return A2(
+			_elm_lang$core$List$member,
+			permut,
+			_elm_community$list_extra$List_Extra$permutations(xs));
+	});
+var _elm_community$list_extra$List_Extra$subsequencesNonEmpty = function (xs) {
+	var _p33 = xs;
+	if (_p33.ctor === '[]') {
+		return _elm_lang$core$Native_List.fromArray(
+			[]);
+	} else {
+		var _p34 = _p33._0;
+		var f = F2(
+			function (ys, r) {
+				return A2(
+					_elm_lang$core$List_ops['::'],
+					ys,
+					A2(
+						_elm_lang$core$List_ops['::'],
+						A2(_elm_lang$core$List_ops['::'], _p34, ys),
+						r));
+			});
+		return A2(
+			_elm_lang$core$List_ops['::'],
+			_elm_lang$core$Native_List.fromArray(
+				[_p34]),
+			A3(
+				_elm_lang$core$List$foldr,
+				f,
+				_elm_lang$core$Native_List.fromArray(
+					[]),
+				_elm_community$list_extra$List_Extra$subsequencesNonEmpty(_p33._1)));
+	}
+};
+var _elm_community$list_extra$List_Extra$subsequences = function (xs) {
+	return A2(
+		_elm_lang$core$List_ops['::'],
+		_elm_lang$core$Native_List.fromArray(
+			[]),
+		_elm_community$list_extra$List_Extra$subsequencesNonEmpty(xs));
+};
+var _elm_community$list_extra$List_Extra$isSubsequenceOf = F2(
+	function (subseq, xs) {
+		return A2(
+			_elm_lang$core$List$member,
+			subseq,
+			_elm_community$list_extra$List_Extra$subsequences(xs));
+	});
+var _elm_community$list_extra$List_Extra$transpose = function (ll) {
+	transpose:
+	while (true) {
+		var _p35 = ll;
+		if (_p35.ctor === '[]') {
+			return _elm_lang$core$Native_List.fromArray(
+				[]);
+		} else {
+			if (_p35._0.ctor === '[]') {
+				var _v25 = _p35._1;
+				ll = _v25;
+				continue transpose;
+			} else {
+				var _p36 = _p35._1;
+				var tails = A2(_elm_lang$core$List$filterMap, _elm_lang$core$List$tail, _p36);
+				var heads = A2(_elm_lang$core$List$filterMap, _elm_lang$core$List$head, _p36);
+				return A2(
+					_elm_lang$core$List_ops['::'],
+					A2(_elm_lang$core$List_ops['::'], _p35._0._0, heads),
+					_elm_community$list_extra$List_Extra$transpose(
+						A2(_elm_lang$core$List_ops['::'], _p35._0._1, tails)));
+			}
+		}
+	}
+};
+var _elm_community$list_extra$List_Extra$intercalate = function (xs) {
+	return function (_p37) {
+		return _elm_lang$core$List$concat(
+			A2(_elm_lang$core$List$intersperse, xs, _p37));
+	};
+};
+var _elm_community$list_extra$List_Extra$removeWhen = F2(
+	function (pred, list) {
+		return A2(
+			_elm_lang$core$List$filter,
+			function (_p38) {
+				return _elm_lang$core$Basics$not(
+					pred(_p38));
+			},
+			list);
+	});
+var _elm_community$list_extra$List_Extra$removeAt = F2(
+	function (index, l) {
+		if (_elm_lang$core$Native_Utils.cmp(index, 0) < 0) {
+			return l;
+		} else {
+			var tail = _elm_lang$core$List$tail(
+				A2(_elm_lang$core$List$drop, index, l));
+			var head = A2(_elm_lang$core$List$take, index, l);
+			var _p39 = tail;
+			if (_p39.ctor === 'Nothing') {
+				return l;
+			} else {
+				return A2(_elm_lang$core$List$append, head, _p39._0);
+			}
+		}
+	});
+var _elm_community$list_extra$List_Extra$singleton = function (x) {
+	return _elm_lang$core$Native_List.fromArray(
+		[x]);
+};
+var _elm_community$list_extra$List_Extra$setAt = F3(
+	function (index, value, l) {
+		if (_elm_lang$core$Native_Utils.cmp(index, 0) < 0) {
+			return _elm_lang$core$Maybe$Nothing;
+		} else {
+			var tail = _elm_lang$core$List$tail(
+				A2(_elm_lang$core$List$drop, index, l));
+			var head = A2(_elm_lang$core$List$take, index, l);
+			var _p40 = tail;
+			if (_p40.ctor === 'Nothing') {
+				return _elm_lang$core$Maybe$Nothing;
+			} else {
+				return _elm_lang$core$Maybe$Just(
+					A2(
+						_elm_lang$core$List$append,
+						head,
+						A2(_elm_lang$core$List_ops['::'], value, _p40._0)));
+			}
+		}
+	});
+var _elm_community$list_extra$List_Extra$deleteIf = F2(
+	function (predicate, items) {
+		return A2(
+			_elm_lang$core$List$filter,
+			function (_p41) {
+				return _elm_lang$core$Basics$not(
+					predicate(_p41));
+			},
+			items);
+	});
+var _elm_community$list_extra$List_Extra$updateIfIndex = F3(
+	function (predicate, update, list) {
+		return A2(
+			_elm_lang$core$List$indexedMap,
+			F2(
+				function (i, x) {
+					return predicate(i) ? update(x) : x;
+				}),
+			list);
+	});
+var _elm_community$list_extra$List_Extra$updateAt = F3(
+	function (index, update, list) {
+		return ((_elm_lang$core$Native_Utils.cmp(index, 0) < 0) || (_elm_lang$core$Native_Utils.cmp(
+			index,
+			_elm_lang$core$List$length(list)) > -1)) ? _elm_lang$core$Maybe$Nothing : _elm_lang$core$Maybe$Just(
+			A3(
+				_elm_community$list_extra$List_Extra$updateIfIndex,
+				F2(
+					function (x, y) {
+						return _elm_lang$core$Native_Utils.eq(x, y);
+					})(index),
+				update,
+				list));
+	});
+var _elm_community$list_extra$List_Extra$updateIf = F3(
+	function (predicate, update, list) {
+		return A2(
+			_elm_lang$core$List$map,
+			function (item) {
+				return predicate(item) ? update(item) : item;
+			},
+			list);
+	});
+var _elm_community$list_extra$List_Extra$replaceIf = F3(
+	function (predicate, replacement, list) {
+		return A3(
+			_elm_community$list_extra$List_Extra$updateIf,
+			predicate,
+			_elm_lang$core$Basics$always(replacement),
+			list);
+	});
+var _elm_community$list_extra$List_Extra$findIndices = function (p) {
+	return function (_p42) {
+		return A2(
+			_elm_lang$core$List$map,
+			_elm_lang$core$Basics$fst,
+			A2(
+				_elm_lang$core$List$filter,
+				function (_p43) {
+					var _p44 = _p43;
+					return p(_p44._1);
+				},
+				A2(
+					_elm_lang$core$List$indexedMap,
+					F2(
+						function (v0, v1) {
+							return {ctor: '_Tuple2', _0: v0, _1: v1};
+						}),
+					_p42)));
+	};
+};
+var _elm_community$list_extra$List_Extra$findIndex = function (p) {
+	return function (_p45) {
+		return _elm_lang$core$List$head(
+			A2(_elm_community$list_extra$List_Extra$findIndices, p, _p45));
+	};
+};
+var _elm_community$list_extra$List_Extra$elemIndices = function (x) {
+	return _elm_community$list_extra$List_Extra$findIndices(
+		F2(
+			function (x, y) {
+				return _elm_lang$core$Native_Utils.eq(x, y);
+			})(x));
+};
+var _elm_community$list_extra$List_Extra$elemIndex = function (x) {
+	return _elm_community$list_extra$List_Extra$findIndex(
+		F2(
+			function (x, y) {
+				return _elm_lang$core$Native_Utils.eq(x, y);
+			})(x));
+};
+var _elm_community$list_extra$List_Extra$find = F2(
+	function (predicate, list) {
+		find:
+		while (true) {
+			var _p46 = list;
+			if (_p46.ctor === '[]') {
+				return _elm_lang$core$Maybe$Nothing;
+			} else {
+				var _p47 = _p46._0;
+				if (predicate(_p47)) {
+					return _elm_lang$core$Maybe$Just(_p47);
+				} else {
+					var _v30 = predicate,
+						_v31 = _p46._1;
+					predicate = _v30;
+					list = _v31;
+					continue find;
+				}
+			}
+		}
+	});
+var _elm_community$list_extra$List_Extra$notMember = function (x) {
+	return function (_p48) {
+		return _elm_lang$core$Basics$not(
+			A2(_elm_lang$core$List$member, x, _p48));
+	};
+};
+var _elm_community$list_extra$List_Extra$andThen = _elm_lang$core$Basics$flip(_elm_lang$core$List$concatMap);
+var _elm_community$list_extra$List_Extra$lift2 = F3(
+	function (f, la, lb) {
+		return A2(
+			_elm_community$list_extra$List_Extra$andThen,
+			la,
+			function (a) {
+				return A2(
+					_elm_community$list_extra$List_Extra$andThen,
+					lb,
+					function (b) {
+						return _elm_lang$core$Native_List.fromArray(
+							[
+								A2(f, a, b)
+							]);
+					});
+			});
+	});
+var _elm_community$list_extra$List_Extra$lift3 = F4(
+	function (f, la, lb, lc) {
+		return A2(
+			_elm_community$list_extra$List_Extra$andThen,
+			la,
+			function (a) {
+				return A2(
+					_elm_community$list_extra$List_Extra$andThen,
+					lb,
+					function (b) {
+						return A2(
+							_elm_community$list_extra$List_Extra$andThen,
+							lc,
+							function (c) {
+								return _elm_lang$core$Native_List.fromArray(
+									[
+										A3(f, a, b, c)
+									]);
+							});
+					});
+			});
+	});
+var _elm_community$list_extra$List_Extra$lift4 = F5(
+	function (f, la, lb, lc, ld) {
+		return A2(
+			_elm_community$list_extra$List_Extra$andThen,
+			la,
+			function (a) {
+				return A2(
+					_elm_community$list_extra$List_Extra$andThen,
+					lb,
+					function (b) {
+						return A2(
+							_elm_community$list_extra$List_Extra$andThen,
+							lc,
+							function (c) {
+								return A2(
+									_elm_community$list_extra$List_Extra$andThen,
+									ld,
+									function (d) {
+										return _elm_lang$core$Native_List.fromArray(
+											[
+												A4(f, a, b, c, d)
+											]);
+									});
+							});
+					});
+			});
+	});
+var _elm_community$list_extra$List_Extra$andMap = F2(
+	function (fl, l) {
+		return A3(
+			_elm_lang$core$List$map2,
+			F2(
+				function (x, y) {
+					return x(y);
+				}),
+			fl,
+			l);
+	});
+var _elm_community$list_extra$List_Extra$dropDuplicatesHelp = F2(
+	function (existing, remaining) {
+		dropDuplicatesHelp:
+		while (true) {
+			var _p49 = remaining;
+			if (_p49.ctor === '[]') {
+				return _elm_lang$core$Native_List.fromArray(
+					[]);
+			} else {
+				var _p51 = _p49._1;
+				var _p50 = _p49._0;
+				if (A2(_elm_lang$core$Set$member, _p50, existing)) {
+					var _v33 = existing,
+						_v34 = _p51;
+					existing = _v33;
+					remaining = _v34;
+					continue dropDuplicatesHelp;
+				} else {
+					return A2(
+						_elm_lang$core$List_ops['::'],
+						_p50,
+						A2(
+							_elm_community$list_extra$List_Extra$dropDuplicatesHelp,
+							A2(_elm_lang$core$Set$insert, _p50, existing),
+							_p51));
+				}
+			}
+		}
+	});
+var _elm_community$list_extra$List_Extra$dropDuplicates = function (list) {
+	return A2(_elm_community$list_extra$List_Extra$dropDuplicatesHelp, _elm_lang$core$Set$empty, list);
+};
+var _elm_community$list_extra$List_Extra$dropWhile = F2(
+	function (predicate, list) {
+		dropWhile:
+		while (true) {
+			var _p52 = list;
+			if (_p52.ctor === '[]') {
+				return _elm_lang$core$Native_List.fromArray(
+					[]);
+			} else {
+				if (predicate(_p52._0)) {
+					var _v36 = predicate,
+						_v37 = _p52._1;
+					predicate = _v36;
+					list = _v37;
+					continue dropWhile;
+				} else {
+					return list;
+				}
+			}
+		}
+	});
+var _elm_community$list_extra$List_Extra$takeWhile = F2(
+	function (predicate, list) {
+		var _p53 = list;
+		if (_p53.ctor === '[]') {
+			return _elm_lang$core$Native_List.fromArray(
+				[]);
+		} else {
+			var _p54 = _p53._0;
+			return predicate(_p54) ? A2(
+				_elm_lang$core$List_ops['::'],
+				_p54,
+				A2(_elm_community$list_extra$List_Extra$takeWhile, predicate, _p53._1)) : _elm_lang$core$Native_List.fromArray(
+				[]);
+		}
+	});
+var _elm_community$list_extra$List_Extra$span = F2(
+	function (p, xs) {
+		return {
+			ctor: '_Tuple2',
+			_0: A2(_elm_community$list_extra$List_Extra$takeWhile, p, xs),
+			_1: A2(_elm_community$list_extra$List_Extra$dropWhile, p, xs)
+		};
+	});
+var _elm_community$list_extra$List_Extra$break = function (p) {
+	return _elm_community$list_extra$List_Extra$span(
+		function (_p55) {
+			return _elm_lang$core$Basics$not(
+				p(_p55));
+		});
+};
+var _elm_community$list_extra$List_Extra$groupWhile = F2(
+	function (eq, xs$) {
+		var _p56 = xs$;
+		if (_p56.ctor === '[]') {
+			return _elm_lang$core$Native_List.fromArray(
+				[]);
+		} else {
+			var _p58 = _p56._0;
+			var _p57 = A2(
+				_elm_community$list_extra$List_Extra$span,
+				eq(_p58),
+				_p56._1);
+			var ys = _p57._0;
+			var zs = _p57._1;
+			return A2(
+				_elm_lang$core$List_ops['::'],
+				A2(_elm_lang$core$List_ops['::'], _p58, ys),
+				A2(_elm_community$list_extra$List_Extra$groupWhile, eq, zs));
+		}
+	});
+var _elm_community$list_extra$List_Extra$group = _elm_community$list_extra$List_Extra$groupWhile(
+	F2(
+		function (x, y) {
+			return _elm_lang$core$Native_Utils.eq(x, y);
+		}));
+var _elm_community$list_extra$List_Extra$minimumBy = F2(
+	function (f, ls) {
+		var minBy = F2(
+			function (x, _p59) {
+				var _p60 = _p59;
+				var _p61 = _p60._1;
+				var fx = f(x);
+				return (_elm_lang$core$Native_Utils.cmp(fx, _p61) < 0) ? {ctor: '_Tuple2', _0: x, _1: fx} : {ctor: '_Tuple2', _0: _p60._0, _1: _p61};
+			});
+		var _p62 = ls;
+		if (_p62.ctor === '::') {
+			if (_p62._1.ctor === '[]') {
+				return _elm_lang$core$Maybe$Just(_p62._0);
+			} else {
+				var _p63 = _p62._0;
+				return _elm_lang$core$Maybe$Just(
+					_elm_lang$core$Basics$fst(
+						A3(
+							_elm_lang$core$List$foldl,
+							minBy,
+							{
+								ctor: '_Tuple2',
+								_0: _p63,
+								_1: f(_p63)
+							},
+							_p62._1)));
+			}
+		} else {
+			return _elm_lang$core$Maybe$Nothing;
+		}
+	});
+var _elm_community$list_extra$List_Extra$maximumBy = F2(
+	function (f, ls) {
+		var maxBy = F2(
+			function (x, _p64) {
+				var _p65 = _p64;
+				var _p66 = _p65._1;
+				var fx = f(x);
+				return (_elm_lang$core$Native_Utils.cmp(fx, _p66) > 0) ? {ctor: '_Tuple2', _0: x, _1: fx} : {ctor: '_Tuple2', _0: _p65._0, _1: _p66};
+			});
+		var _p67 = ls;
+		if (_p67.ctor === '::') {
+			if (_p67._1.ctor === '[]') {
+				return _elm_lang$core$Maybe$Just(_p67._0);
+			} else {
+				var _p68 = _p67._0;
+				return _elm_lang$core$Maybe$Just(
+					_elm_lang$core$Basics$fst(
+						A3(
+							_elm_lang$core$List$foldl,
+							maxBy,
+							{
+								ctor: '_Tuple2',
+								_0: _p68,
+								_1: f(_p68)
+							},
+							_p67._1)));
+			}
+		} else {
+			return _elm_lang$core$Maybe$Nothing;
+		}
+	});
+var _elm_community$list_extra$List_Extra$uncons = function (xs) {
+	var _p69 = xs;
+	if (_p69.ctor === '[]') {
+		return _elm_lang$core$Maybe$Nothing;
+	} else {
+		return _elm_lang$core$Maybe$Just(
+			{ctor: '_Tuple2', _0: _p69._0, _1: _p69._1});
+	}
+};
+var _elm_community$list_extra$List_Extra$iterate = F2(
+	function (f, x) {
+		var _p70 = f(x);
+		if (_p70.ctor === 'Just') {
+			return A2(
+				_elm_lang$core$List_ops['::'],
+				x,
+				A2(_elm_community$list_extra$List_Extra$iterate, f, _p70._0));
+		} else {
+			return _elm_lang$core$Native_List.fromArray(
+				[x]);
+		}
+	});
+var _elm_community$list_extra$List_Extra$getAt = F2(
+	function (idx, xs) {
+		return (_elm_lang$core$Native_Utils.cmp(idx, 0) < 0) ? _elm_lang$core$Maybe$Nothing : _elm_lang$core$List$head(
+			A2(_elm_lang$core$List$drop, idx, xs));
+	});
+var _elm_community$list_extra$List_Extra_ops = _elm_community$list_extra$List_Extra_ops || {};
+_elm_community$list_extra$List_Extra_ops['!!'] = _elm_lang$core$Basics$flip(_elm_community$list_extra$List_Extra$getAt);
+var _elm_community$list_extra$List_Extra$init = function () {
+	var maybe = F2(
+		function (d, f) {
+			return function (_p71) {
+				return A2(
+					_elm_lang$core$Maybe$withDefault,
+					d,
+					A2(_elm_lang$core$Maybe$map, f, _p71));
+			};
+		});
+	return A2(
+		_elm_lang$core$List$foldr,
+		function (_p72) {
+			return A2(
+				F2(
+					function (x, y) {
+						return function (_p73) {
+							return x(
+								y(_p73));
+						};
+					}),
+				_elm_lang$core$Maybe$Just,
+				A2(
+					maybe,
+					_elm_lang$core$Native_List.fromArray(
+						[]),
+					F2(
+						function (x, y) {
+							return A2(_elm_lang$core$List_ops['::'], x, y);
+						})(_p72)));
+		},
+		_elm_lang$core$Maybe$Nothing);
+}();
+var _elm_community$list_extra$List_Extra$last = _elm_community$list_extra$List_Extra$foldl1(
+	_elm_lang$core$Basics$flip(_elm_lang$core$Basics$always));
 
 //import Native.Json //
 
@@ -10022,32 +10895,21 @@ var _user$project$Passive$Model = function (a) {
 };
 var _user$project$Passive$decoder = A2(_elm_lang$core$Json_Decode$map, _user$project$Passive$Model, _user$project$Passive$passive);
 
-var _user$project$Champion$break = A3(
-	_elm_lang$core$Regex$replace,
-	_elm_lang$core$Regex$All,
-	_elm_lang$core$Regex$regex(
-		_elm_lang$core$Regex$escape('<br>')),
-	function (_p0) {
-		return '\n';
-	});
+var _user$project$Champion$break = function (_p0) {
+	return A2(
+		_elm_lang$core$String$join,
+		'\n',
+		A2(_elm_lang$core$String$split, '<br>', _p0));
+};
 var _user$project$Champion$validSkin = F2(
-	function (id, champ) {
-		return A2(
-			_elm_lang$core$List$any,
-			function (x) {
-				var _p1 = _user$project$Skin$num(x);
-				if (_p1.ctor === 'Err') {
-					return false;
-				} else {
-					return _elm_lang$core$Native_Utils.eq(_p1._0, id);
-				}
-			},
-			champ.skins);
+	function (skin, _p1) {
+		var _p2 = _p1;
+		return A2(_elm_lang$core$List$member, skin, _p2.skins);
 	});
 var _user$project$Champion$icon = F2(
 	function (r, m) {
-		var _p2 = m;
-		if (_p2.ctor === 'Empty') {
+		var _p3 = m;
+		if (_p3.ctor === 'Empty') {
 			return _elm_lang$html$Html$text('');
 		} else {
 			return _user$project$Realm$isEmpty(r) ? _elm_lang$html$Html$text('') : A2(
@@ -10070,20 +10932,24 @@ var _user$project$Champion$icon = F2(
 									A2(
 										_elm_lang$core$Basics_ops['++'],
 										'/img/champion/',
-										A2(_elm_lang$core$Basics_ops['++'], _p2._0.key, '.png'))))))
+										A2(_elm_lang$core$Basics_ops['++'], _p3._0.key, '.png'))))))
 					]),
 				_elm_lang$core$Native_List.fromArray(
 					[]));
 		}
 	});
 var _user$project$Champion$skinLoadingScreen = F2(
-	function (id, m) {
-		var _p3 = m;
-		if (_p3.ctor === 'Empty') {
+	function (skin, m) {
+		var _p4 = m;
+		if (_p4.ctor === 'Empty') {
 			return _elm_lang$html$Html$text('');
 		} else {
-			var _p4 = _p3._0;
-			var valid = A2(_user$project$Champion$validSkin, id, _p4);
+			var _p5 = _p4._0;
+			var num = A2(
+				_elm_lang$core$Result$withDefault,
+				0,
+				_user$project$Skin$num(skin));
+			var valid = A2(_user$project$Champion$validSkin, skin, _p5);
 			return A2(
 				_elm_lang$html$Html$img,
 				_elm_lang$core$Native_List.fromArray(
@@ -10097,26 +10963,26 @@ var _user$project$Champion$skinLoadingScreen = F2(
 								'/img/champion/loading/',
 								A2(
 									_elm_lang$core$Basics_ops['++'],
-									_p4.key,
+									_p5.key,
 									A2(
 										_elm_lang$core$Basics_ops['++'],
 										'_',
 										A2(
 											_elm_lang$core$Basics_ops['++'],
-											valid ? _elm_lang$core$Basics$toString(id) : '0',
+											valid ? _elm_lang$core$Basics$toString(num) : '0',
 											'.jpg')))))),
-						_elm_lang$html$Html_Attributes$alt(_p4.name)
+						_elm_lang$html$Html_Attributes$alt(_p5.name)
 					]),
 				_elm_lang$core$Native_List.fromArray(
 					[]));
 		}
 	});
 var _user$project$Champion$loadingScreen = function (m) {
-	var _p5 = m;
-	if (_p5.ctor === 'Empty') {
+	var _p6 = m;
+	if (_p6.ctor === 'Empty') {
 		return _elm_lang$html$Html$text('');
 	} else {
-		var _p6 = _p5._0;
+		var _p7 = _p6._0;
 		return A2(
 			_elm_lang$html$Html$img,
 			_elm_lang$core$Native_List.fromArray(
@@ -10128,21 +10994,25 @@ var _user$project$Champion$loadingScreen = function (m) {
 						A2(
 							_elm_lang$core$Basics_ops['++'],
 							'/img/champion/loading/',
-							A2(_elm_lang$core$Basics_ops['++'], _p6.key, '_0.jpg')))),
-					_elm_lang$html$Html_Attributes$alt(_p6.name)
+							A2(_elm_lang$core$Basics_ops['++'], _p7.key, '_0.jpg')))),
+					_elm_lang$html$Html_Attributes$alt(_p7.name)
 				]),
 			_elm_lang$core$Native_List.fromArray(
 				[]));
 	}
 };
 var _user$project$Champion$skinSplashArt = F2(
-	function (id, m) {
-		var _p7 = m;
-		if (_p7.ctor === 'Empty') {
+	function (skin, m) {
+		var _p8 = m;
+		if (_p8.ctor === 'Empty') {
 			return _elm_lang$html$Html$text('');
 		} else {
-			var _p8 = _p7._0;
-			var valid = A2(_user$project$Champion$validSkin, id, _p8);
+			var _p9 = _p8._0;
+			var num = A2(
+				_elm_lang$core$Result$withDefault,
+				0,
+				_user$project$Skin$num(skin));
+			var valid = A2(_user$project$Champion$validSkin, skin, _p9);
 			return A2(
 				_elm_lang$html$Html$img,
 				_elm_lang$core$Native_List.fromArray(
@@ -10156,26 +11026,26 @@ var _user$project$Champion$skinSplashArt = F2(
 								'/img/champion/splash/',
 								A2(
 									_elm_lang$core$Basics_ops['++'],
-									_p8.key,
+									_p9.key,
 									A2(
 										_elm_lang$core$Basics_ops['++'],
 										'_',
 										A2(
 											_elm_lang$core$Basics_ops['++'],
-											valid ? _elm_lang$core$Basics$toString(id) : '0',
+											valid ? _elm_lang$core$Basics$toString(num) : '0',
 											'.jpg')))))),
-						_elm_lang$html$Html_Attributes$alt(_p8.name)
+						_elm_lang$html$Html_Attributes$alt(_p9.name)
 					]),
 				_elm_lang$core$Native_List.fromArray(
 					[]));
 		}
 	});
 var _user$project$Champion$splashArt = function (m) {
-	var _p9 = m;
-	if (_p9.ctor === 'Empty') {
+	var _p10 = m;
+	if (_p10.ctor === 'Empty') {
 		return _elm_lang$html$Html$text('');
 	} else {
-		var _p10 = _p9._0;
+		var _p11 = _p10._0;
 		return A2(
 			_elm_lang$html$Html$img,
 			_elm_lang$core$Native_List.fromArray(
@@ -10187,152 +11057,202 @@ var _user$project$Champion$splashArt = function (m) {
 						A2(
 							_elm_lang$core$Basics_ops['++'],
 							'/img/champion/splash/',
-							A2(_elm_lang$core$Basics_ops['++'], _p10.key, '_0.jpg')))),
-					_elm_lang$html$Html_Attributes$alt(_p10.name)
+							A2(_elm_lang$core$Basics_ops['++'], _p11.key, '_0.jpg')))),
+					_elm_lang$html$Html_Attributes$alt(_p11.name)
 				]),
 			_elm_lang$core$Native_List.fromArray(
 				[]));
 	}
 };
 var _user$project$Champion$title = function (m) {
-	var _p11 = m;
-	if (_p11.ctor === 'Empty') {
+	var _p12 = m;
+	if (_p12.ctor === 'Empty') {
 		return _user$project$Core$emptyModelError('Champion.title');
 	} else {
-		return _elm_lang$core$Result$Ok(_p11._0.title);
+		return _elm_lang$core$Result$Ok(_p12._0.title);
 	}
 };
 var _user$project$Champion$tags = function (m) {
-	var _p12 = m;
-	if (_p12.ctor === 'Empty') {
+	var _p13 = m;
+	if (_p13.ctor === 'Empty') {
 		return _user$project$Core$emptyModelError('Champion.tags');
 	} else {
-		return _elm_lang$core$Result$Ok(_p12._0.tags);
+		return _elm_lang$core$Result$Ok(_p13._0.tags);
 	}
 };
 var _user$project$Champion$stats = function (m) {
-	var _p13 = m;
-	if (_p13.ctor === 'Empty') {
+	var _p14 = m;
+	if (_p14.ctor === 'Empty') {
 		return _user$project$Core$emptyModelError('Champion.stats');
 	} else {
-		return _elm_lang$core$Result$Ok(_p13._0.stats);
+		return _elm_lang$core$Result$Ok(_p14._0.stats);
 	}
 };
 var _user$project$Champion$spells = function (m) {
-	var _p14 = m;
-	if (_p14.ctor === 'Empty') {
+	var _p15 = m;
+	if (_p15.ctor === 'Empty') {
 		return _user$project$Core$emptyModelError('Champion.spells');
 	} else {
-		return _elm_lang$core$Result$Ok(_p14._0.spells);
+		return _elm_lang$core$Result$Ok(_p15._0.spells);
 	}
 };
 var _user$project$Champion$skins = function (m) {
-	var _p15 = m;
-	if (_p15.ctor === 'Empty') {
+	var _p16 = m;
+	if (_p16.ctor === 'Empty') {
 		return _user$project$Core$emptyModelError('Champion.skins');
 	} else {
-		return _elm_lang$core$Result$Ok(_p15._0.skins);
+		return _elm_lang$core$Result$Ok(_p16._0.skins);
 	}
 };
 var _user$project$Champion$recommended = function (m) {
-	var _p16 = m;
-	if (_p16.ctor === 'Empty') {
+	var _p17 = m;
+	if (_p17.ctor === 'Empty') {
 		return _user$project$Core$emptyModelError('Champion.recommended');
 	} else {
-		return _elm_lang$core$Result$Ok(_p16._0.recommended);
+		return _elm_lang$core$Result$Ok(_p17._0.recommended);
 	}
 };
 var _user$project$Champion$passive = function (m) {
-	var _p17 = m;
-	if (_p17.ctor === 'Empty') {
+	var _p18 = m;
+	if (_p18.ctor === 'Empty') {
 		return _user$project$Core$emptyModelError('Champion.passive');
 	} else {
-		return _elm_lang$core$Result$Ok(_p17._0.passive);
+		return _elm_lang$core$Result$Ok(_p18._0.passive);
 	}
 };
 var _user$project$Champion$partype = function (m) {
-	var _p18 = m;
-	if (_p18.ctor === 'Empty') {
+	var _p19 = m;
+	if (_p19.ctor === 'Empty') {
 		return _user$project$Core$emptyModelError('Champion.partype');
 	} else {
-		return _elm_lang$core$Result$Ok(_p18._0.partype);
+		return _elm_lang$core$Result$Ok(_p19._0.partype);
 	}
 };
 var _user$project$Champion$name = function (m) {
-	var _p19 = m;
-	if (_p19.ctor === 'Empty') {
+	var _p20 = m;
+	if (_p20.ctor === 'Empty') {
 		return _user$project$Core$emptyModelError('Champion.name');
 	} else {
-		return _elm_lang$core$Result$Ok(_p19._0.name);
+		return _elm_lang$core$Result$Ok(_p20._0.name);
+	}
+};
+var _user$project$Champion$loreFormatted = function (m) {
+	var _p21 = m;
+	if (_p21.ctor === 'Empty') {
+		return _user$project$Core$emptyModelError('Champion.loreFormatted');
+	} else {
+		return _elm_lang$core$Result$Ok(
+			A2(
+				_elm_lang$html$Html$span,
+				_elm_lang$core$Native_List.fromArray(
+					[]),
+				A2(
+					_elm_lang$core$List$intersperse,
+					A2(
+						_elm_lang$html$Html$br,
+						_elm_lang$core$Native_List.fromArray(
+							[]),
+						_elm_lang$core$Native_List.fromArray(
+							[])),
+					A2(
+						_elm_lang$core$List$map,
+						_elm_lang$html$Html$text,
+						A2(_elm_lang$core$String$split, '<br>', _p21._0.lore)))));
 	}
 };
 var _user$project$Champion$lore = function (m) {
-	var _p20 = m;
-	if (_p20.ctor === 'Empty') {
+	var _p22 = m;
+	if (_p22.ctor === 'Empty') {
 		return _user$project$Core$emptyModelError('Champion.lore');
 	} else {
-		return _elm_lang$core$Result$Ok(_p20._0.lore);
+		return _elm_lang$core$Result$Ok(
+			_user$project$Champion$break(_p22._0.lore));
 	}
 };
 var _user$project$Champion$key = function (m) {
-	var _p21 = m;
-	if (_p21.ctor === 'Empty') {
+	var _p23 = m;
+	if (_p23.ctor === 'Empty') {
 		return _user$project$Core$emptyModelError('Champion.key');
 	} else {
-		return _elm_lang$core$Result$Ok(_p21._0.key);
+		return _elm_lang$core$Result$Ok(_p23._0.key);
 	}
 };
 var _user$project$Champion$info = function (m) {
-	var _p22 = m;
-	if (_p22.ctor === 'Empty') {
+	var _p24 = m;
+	if (_p24.ctor === 'Empty') {
 		return _user$project$Core$emptyModelError('Champion.info');
 	} else {
-		return _elm_lang$core$Result$Ok(_p22._0.info);
+		return _elm_lang$core$Result$Ok(_p24._0.info);
 	}
 };
 var _user$project$Champion$image = function (m) {
-	var _p23 = m;
-	if (_p23.ctor === 'Empty') {
+	var _p25 = m;
+	if (_p25.ctor === 'Empty') {
 		return _user$project$Core$emptyModelError('Champion.image');
 	} else {
-		return _elm_lang$core$Result$Ok(_p23._0.image);
+		return _elm_lang$core$Result$Ok(_p25._0.image);
 	}
 };
 var _user$project$Champion$id = function (m) {
-	var _p24 = m;
-	if (_p24.ctor === 'Empty') {
+	var _p26 = m;
+	if (_p26.ctor === 'Empty') {
 		return _user$project$Core$emptyModelError('Champion.id');
 	} else {
-		return _elm_lang$core$Result$Ok(_p24._0.id);
+		return _elm_lang$core$Result$Ok(_p26._0.id);
 	}
 };
 var _user$project$Champion$enemytips = function (m) {
-	var _p25 = m;
-	if (_p25.ctor === 'Empty') {
+	var _p27 = m;
+	if (_p27.ctor === 'Empty') {
 		return _user$project$Core$emptyModelError('Champion.enemytips');
 	} else {
-		return _elm_lang$core$Result$Ok(_p25._0.enemytips);
+		return _elm_lang$core$Result$Ok(_p27._0.enemytips);
+	}
+};
+var _user$project$Champion$blurbFormatted = function (m) {
+	var _p28 = m;
+	if (_p28.ctor === 'Empty') {
+		return _user$project$Core$emptyModelError('Champion.blurbFormatted');
+	} else {
+		return _elm_lang$core$Result$Ok(
+			A2(
+				_elm_lang$html$Html$span,
+				_elm_lang$core$Native_List.fromArray(
+					[]),
+				A2(
+					_elm_lang$core$List$intersperse,
+					A2(
+						_elm_lang$html$Html$br,
+						_elm_lang$core$Native_List.fromArray(
+							[]),
+						_elm_lang$core$Native_List.fromArray(
+							[])),
+					A2(
+						_elm_lang$core$List$map,
+						_elm_lang$html$Html$text,
+						A2(_elm_lang$core$String$split, '<br>', _p28._0.blurb)))));
 	}
 };
 var _user$project$Champion$blurb = function (m) {
-	var _p26 = m;
-	if (_p26.ctor === 'Empty') {
+	var _p29 = m;
+	if (_p29.ctor === 'Empty') {
 		return _user$project$Core$emptyModelError('Champion.blurb');
 	} else {
-		return _elm_lang$core$Result$Ok(_p26._0.blurb);
+		return _elm_lang$core$Result$Ok(
+			_user$project$Champion$break(_p29._0.blurb));
 	}
 };
 var _user$project$Champion$allytips = function (m) {
-	var _p27 = m;
-	if (_p27.ctor === 'Empty') {
+	var _p30 = m;
+	if (_p30.ctor === 'Empty') {
 		return _user$project$Core$emptyModelError('Champion.allytips');
 	} else {
-		return _elm_lang$core$Result$Ok(_p27._0.allytips);
+		return _elm_lang$core$Result$Ok(_p30._0.allytips);
 	}
 };
 var _user$project$Champion$isEmpty = function (m) {
-	var _p28 = m;
-	if (_p28.ctor === 'Empty') {
+	var _p31 = m;
+	if (_p31.ctor === 'Empty') {
 		return true;
 	} else {
 		return false;
@@ -10421,10 +11341,7 @@ var _user$project$Champion$champion = A2(
 													A2(_elm_lang$core$Json_Decode_ops[':='], 'image', _user$project$Image$decoder)),
 												A2(_elm_lang$core$Json_Decode_ops[':='], 'info', _user$project$ChampionInfo$decoder)),
 											A2(_elm_lang$core$Json_Decode_ops[':='], 'key', _elm_lang$core$Json_Decode$string)),
-										A2(
-											_elm_lang$core$Json_Decode$map,
-											_user$project$Champion$break,
-											A2(_elm_lang$core$Json_Decode_ops[':='], 'lore', _elm_lang$core$Json_Decode$string))),
+										A2(_elm_lang$core$Json_Decode_ops[':='], 'lore', _elm_lang$core$Json_Decode$string)),
 									A2(_elm_lang$core$Json_Decode_ops[':='], 'name', _elm_lang$core$Json_Decode$string)),
 								A2(_elm_lang$core$Json_Decode_ops[':='], 'partype', _elm_lang$core$Json_Decode$string)),
 							A2(_elm_lang$core$Json_Decode_ops[':='], 'passive', _user$project$Passive$decoder)),
@@ -10454,20 +11371,20 @@ var _user$project$Champion$Model = function (a) {
 var _user$project$Champion$decoder = A2(_elm_lang$core$Json_Decode$map, _user$project$Champion$Model, _user$project$Champion$champion);
 
 var _user$project$ChampionList$ids = function (m) {
-	var $switch = function (_p0) {
-		var _p1 = _p0;
-		return {ctor: '_Tuple2', _0: _p1._1, _1: _p1._0};
-	};
-	var _p2 = m;
-	if (_p2.ctor === 'Empty') {
+	var _p0 = m;
+	if (_p0.ctor === 'Empty') {
 		return _user$project$Core$emptyModelError('ChampionList.ids');
 	} else {
+		var $switch = function (_p1) {
+			var _p2 = _p1;
+			return {ctor: '_Tuple2', _0: _p2._1, _1: _p2._0};
+		};
 		return _elm_lang$core$Result$Ok(
 			_elm_lang$core$Dict$fromList(
 				A2(
 					_elm_lang$core$List$map,
 					$switch,
-					_elm_lang$core$Dict$toList(_p2._0.keys))));
+					_elm_lang$core$Dict$toList(_p0._0.keys))));
 	}
 };
 var _user$project$ChampionList$keys = function (m) {
@@ -10517,7 +11434,7 @@ var _user$project$ChampionList$championList = A2(
 			A2(
 				_elm_lang$core$Json_Decode_ops[':='],
 				'keys',
-				_elm_lang$core$Json_Decode$dict(_elm_lang$core$Json_Decode$string))),
+				A2(_elm_community$json_extra$Json_Decode_Extra$dict2, _elm_lang$core$Json_Decode$int, _elm_lang$core$Json_Decode$string))),
 		A2(_elm_lang$core$Json_Decode_ops[':='], 'type', _elm_lang$core$Json_Decode$string)),
 	A2(_elm_lang$core$Json_Decode_ops[':='], 'version', _elm_lang$core$Json_Decode$string));
 var _user$project$ChampionList$Empty = {ctor: 'Empty'};
@@ -10616,7 +11533,21 @@ var _user$project$Request_Static$new = F2(
 
 var _user$project$Main$viewSkin = function (_p0) {
 	var _p1 = _p0;
-	return A2(_user$project$Champion$skinSplashArt, _p1.currentSkin, _p1.champion);
+	var _p2 = _p1.champion;
+	return A2(
+		_elm_lang$core$Result$withDefault,
+		_elm_lang$html$Html$text(''),
+		A2(
+			_elm_lang$core$Result$andThen,
+			_user$project$Champion$skins(_p2),
+			function (skins) {
+				var s = A2(
+					_elm_lang$core$Maybe$withDefault,
+					_user$project$Skin$empty,
+					A2(_elm_community$list_extra$List_Extra$getAt, _p1.currentSkin, skins));
+				return _elm_lang$core$Result$Ok(
+					A2(_user$project$Champion$skinSplashArt, s, _p2));
+			}));
 };
 var _user$project$Main$viewOneSpell = F2(
 	function (realm, spell) {
@@ -10635,14 +11566,14 @@ var _user$project$Main$viewOneSpell = F2(
 					A2(_user$project$Spell$icon, realm, spell)
 				]));
 	});
-var _user$project$Main$viewSpells = function (_p2) {
-	var _p3 = _p2;
+var _user$project$Main$viewSpells = function (_p3) {
+	var _p4 = _p3;
 	return A2(
 		_elm_lang$core$Result$withDefault,
 		_elm_lang$html$Html$text(''),
 		A2(
 			_elm_lang$core$Result$andThen,
-			_user$project$Champion$spells(_p3.champion),
+			_user$project$Champion$spells(_p4.champion),
 			function (spells) {
 				return _elm_lang$core$Result$Ok(
 					A2(
@@ -10651,18 +11582,18 @@ var _user$project$Main$viewSpells = function (_p2) {
 							[]),
 						A2(
 							_elm_lang$core$List$map,
-							_user$project$Main$viewOneSpell(_p3.realm),
+							_user$project$Main$viewOneSpell(_p4.realm),
 							spells)));
 			}));
 };
-var _user$project$Main$viewPassive = function (_p4) {
-	var _p5 = _p4;
+var _user$project$Main$viewPassive = function (_p5) {
+	var _p6 = _p5;
 	return A2(
 		_elm_lang$core$Result$withDefault,
 		_elm_lang$html$Html$text(''),
 		A2(
 			_elm_lang$core$Result$andThen,
-			_user$project$Champion$passive(_p5.champion),
+			_user$project$Champion$passive(_p6.champion),
 			function (passive) {
 				return A2(
 					_elm_lang$core$Result$andThen,
@@ -10677,25 +11608,25 @@ var _user$project$Main$viewPassive = function (_p4) {
 									]),
 								_elm_lang$core$Native_List.fromArray(
 									[
-										A2(_user$project$Passive$icon, _p5.realm, passive)
+										A2(_user$project$Passive$icon, _p6.realm, passive)
 									])));
 					});
 			}));
 };
 var _user$project$Main$viewHeading = F2(
-	function (attr, _p6) {
-		var _p7 = _p6;
-		var _p8 = _p7.champion;
+	function (attr, _p7) {
+		var _p8 = _p7;
+		var _p9 = _p8.champion;
 		return A2(
 			_elm_lang$core$Result$withDefault,
 			_elm_lang$html$Html$text(''),
 			A2(
 				_elm_lang$core$Result$andThen,
-				_user$project$Champion$name(_p8),
+				_user$project$Champion$name(_p9),
 				function (name) {
 					return A2(
 						_elm_lang$core$Result$andThen,
-						_user$project$Champion$title(_p8),
+						_user$project$Champion$title(_p9),
 						function (title) {
 							return _elm_lang$core$Result$Ok(
 								A2(
@@ -10746,14 +11677,14 @@ var _user$project$Main$NewRealm = function (a) {
 };
 var _user$project$Main$Blurb = {ctor: 'Blurb'};
 var _user$project$Main$viewLore = F2(
-	function (attr, _p9) {
-		var _p10 = _p9;
+	function (attr, _p10) {
+		var _p11 = _p10;
 		return A2(
 			_elm_lang$core$Result$withDefault,
 			_elm_lang$html$Html$text(''),
 			A2(
 				_elm_lang$core$Result$andThen,
-				_user$project$Champion$lore(_p10.champion),
+				_user$project$Champion$loreFormatted(_p11.champion),
 				function (lore) {
 					return _elm_lang$core$Result$Ok(
 						A2(
@@ -10761,7 +11692,7 @@ var _user$project$Main$viewLore = F2(
 							attr,
 							_elm_lang$core$Native_List.fromArray(
 								[
-									_elm_lang$html$Html$text(lore),
+									lore,
 									A2(
 									_elm_lang$html$Html$br,
 									_elm_lang$core$Native_List.fromArray(
@@ -10783,14 +11714,14 @@ var _user$project$Main$viewLore = F2(
 	});
 var _user$project$Main$Full = {ctor: 'Full'};
 var _user$project$Main$viewBlurb = F2(
-	function (attr, _p11) {
-		var _p12 = _p11;
+	function (attr, _p12) {
+		var _p13 = _p12;
 		return A2(
 			_elm_lang$core$Result$withDefault,
 			_elm_lang$html$Html$text(''),
 			A2(
 				_elm_lang$core$Result$andThen,
-				_user$project$Champion$blurb(_p12.champion),
+				_user$project$Champion$blurbFormatted(_p13.champion),
 				function (blurb) {
 					return _elm_lang$core$Result$Ok(
 						A2(
@@ -10798,7 +11729,7 @@ var _user$project$Main$viewBlurb = F2(
 							attr,
 							_elm_lang$core$Native_List.fromArray(
 								[
-									_elm_lang$html$Html$text(blurb),
+									blurb,
 									A2(
 									_elm_lang$html$Html$br,
 									_elm_lang$core$Native_List.fromArray(
@@ -10867,15 +11798,15 @@ var _user$project$Main$Fail = function (a) {
 };
 var _user$project$Main$update = F2(
 	function (message, model) {
-		var _p13 = message;
-		switch (_p13.ctor) {
+		var _p14 = message;
+		switch (_p14.ctor) {
 			case 'NewKey':
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							$static: A2(_user$project$Request_Static$new, _user$project$Endpoint$euw, _p13._0)
+							$static: A2(_user$project$Request_Static$new, _user$project$Endpoint$euw, _p14._0)
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
@@ -10890,30 +11821,33 @@ var _user$project$Main$update = F2(
 						_user$project$Request_Static$getAllChampions(model.$static))
 				};
 			case 'Search':
-				var id = A2(
-					_elm_lang$core$Result$withDefault,
-					-1,
-					_elm_lang$core$String$toInt(_p13._0));
+				var $new = A2(
+					_elm_lang$core$Maybe$andThen,
+					_elm_lang$core$Result$toMaybe(
+						_user$project$ChampionList$data(model.all)),
+					_elm_lang$core$Dict$get(_p14._0));
+				var old = model.champion;
 				return {
 					ctor: '_Tuple2',
-					_0: model,
-					_1: A3(
-						_elm_lang$core$Task$perform,
-						_user$project$Main$Fail,
-						_user$project$Main$Succeed,
-						A2(_user$project$Request_Static$getChampionById, model.$static, id))
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							champion: A2(_elm_lang$core$Maybe$withDefault, old, $new),
+							currentSkin: 0
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'Fail':
 				return A2(
 					_elm_lang$core$Debug$log,
-					_elm_lang$core$Basics$toString(_p13._0),
+					_elm_lang$core$Basics$toString(_p14._0),
 					{ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none});
 			case 'Succeed':
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{champion: _p13._0, currentSkin: 0}),
+						{champion: _p14._0, currentSkin: 0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'Init':
@@ -10922,7 +11856,7 @@ var _user$project$Main$update = F2(
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{all: _p13._0}),
+						{all: _p14._0}),
 					_1: A3(
 						_elm_lang$core$Task$perform,
 						_user$project$Main$Fail,
@@ -10946,12 +11880,12 @@ var _user$project$Main$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'NewRealm':
-				var _p14 = _p13._0;
-				return _user$project$Realm$isEmpty(_p14) ? {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none} : {
+				var _p15 = _p14._0;
+				return _user$project$Realm$isEmpty(_p15) ? {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none} : {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{realm: _p14}),
+						{realm: _p15}),
 					_1: _user$project$Champion$isEmpty(model.champion) ? A3(
 						_elm_lang$core$Task$perform,
 						_user$project$Main$Fail,
@@ -10988,12 +11922,30 @@ var _user$project$Main$update = F2(
 var _user$project$Main$Search = function (a) {
 	return {ctor: 'Search', _0: a};
 };
-var _user$project$Main$viewSelect = function (_p15) {
-	var _p16 = _p15;
-	var keys = A2(
+var _user$project$Main$viewSelect = function (_p16) {
+	var _p17 = _p16;
+	var _p21 = _p17.all;
+	var data = A2(
 		_elm_lang$core$Result$withDefault,
 		_elm_lang$core$Dict$empty,
-		_user$project$ChampionList$keys(_p16.all));
+		_user$project$ChampionList$data(_p21));
+	var keyToName = function (k) {
+		return A2(
+			_elm_lang$core$Maybe$withDefault,
+			k,
+			A2(
+				_elm_lang$core$Maybe$andThen,
+				A2(_elm_lang$core$Dict$get, k, data),
+				function (_p18) {
+					return _elm_lang$core$Result$toMaybe(
+						_user$project$Champion$name(_p18));
+				}));
+	};
+	var keys = _elm_lang$core$Dict$values(
+		A2(
+			_elm_lang$core$Result$withDefault,
+			_elm_lang$core$Dict$empty,
+			_user$project$ChampionList$keys(_p21)));
 	return A2(
 		_elm_lang$html$Html$select,
 		_elm_lang$core$Native_List.fromArray(
@@ -11002,29 +11954,35 @@ var _user$project$Main$viewSelect = function (_p15) {
 			]),
 		A2(
 			_elm_lang$core$List$map,
-			function (_p17) {
-				var _p18 = _p17;
+			function (_p19) {
+				var _p20 = _p19;
 				return A2(
 					_elm_lang$html$Html$option,
 					_elm_lang$core$Native_List.fromArray(
 						[
-							_elm_lang$html$Html_Attributes$value(_p18._0)
+							_elm_lang$html$Html_Attributes$value(_p20._0)
 						]),
 					_elm_lang$core$Native_List.fromArray(
 						[
-							_elm_lang$html$Html$text(_p18._1)
+							_elm_lang$html$Html$text(_p20._1)
 						]));
 			},
-			_elm_lang$core$Dict$toList(keys)));
+			A2(
+				_elm_lang$core$List$sortBy,
+				_elm_lang$core$Basics$snd,
+				A2(
+					_elm_community$list_extra$List_Extra$zip,
+					keys,
+					A2(_elm_lang$core$List$map, keyToName, keys)))));
 };
 var _user$project$Main$Validate = {ctor: 'Validate'};
-var _user$project$Main$init = function (_p19) {
-	var _p20 = _p19;
+var _user$project$Main$init = function (_p22) {
+	var _p23 = _p22;
 	return A2(
 		_user$project$Main$update,
 		_user$project$Main$Validate,
 		{
-			$static: A2(_user$project$Request_Static$new, _user$project$Endpoint$euw, _p20.key),
+			$static: A2(_user$project$Request_Static$new, _user$project$Endpoint$euw, _p23.key),
 			champion: _user$project$Champion$empty,
 			all: _user$project$ChampionList$empty,
 			full: false,
@@ -11064,22 +12022,22 @@ var _user$project$Main$viewKeyInput = A2(
 					_elm_lang$html$Html$text('submit')
 				]))
 		]));
-var _user$project$Main$view = function (_p21) {
-	var _p22 = _p21;
-	var _p23 = _p22;
+var _user$project$Main$view = function (_p24) {
+	var _p25 = _p24;
+	var _p26 = _p25;
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
 			[]),
 		_elm_lang$core$Native_List.fromArray(
 			[
-				_user$project$ChampionList$isEmpty(_p22.all) ? _user$project$Main$viewKeyInput : A2(
+				_user$project$ChampionList$isEmpty(_p25.all) ? _user$project$Main$viewKeyInput : A2(
 				_elm_lang$html$Html$span,
 				_elm_lang$core$Native_List.fromArray(
 					[]),
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_user$project$Main$viewSelect(_p23),
+						_user$project$Main$viewSelect(_p26),
 						A2(
 						_elm_lang$html$Html$button,
 						_elm_lang$core$Native_List.fromArray(
@@ -11107,7 +12065,7 @@ var _user$project$Main$view = function (_p21) {
 					[]),
 				_elm_lang$core$Native_List.fromArray(
 					[])),
-				_user$project$Main$viewChampion(_p23)
+				_user$project$Main$viewChampion(_p26)
 			]));
 };
 var _user$project$Main$main = {
