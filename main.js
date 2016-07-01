@@ -10870,20 +10870,24 @@ var _user$project$Main$update = F2(
 		var _p13 = message;
 		switch (_p13.ctor) {
 			case 'NewKey':
-				var _p14 = _p13._0;
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							$static: A2(_user$project$Request_Static$new, _user$project$Endpoint$euw, _p14)
+							$static: A2(_user$project$Request_Static$new, _user$project$Endpoint$euw, _p13._0)
 						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'Validate':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
 					_1: A3(
 						_elm_lang$core$Task$perform,
 						_user$project$Main$Fail,
 						_user$project$Main$Init,
-						_user$project$Request_Static$getAllChampions(
-							A2(_user$project$Request_Static$new, _user$project$Endpoint$euw, _p14)))
+						_user$project$Request_Static$getAllChampions(model.$static))
 				};
 			case 'Search':
 				var id = A2(
@@ -10942,12 +10946,12 @@ var _user$project$Main$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'NewRealm':
-				var _p15 = _p13._0;
-				return _user$project$Realm$isEmpty(_p15) ? {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none} : {
+				var _p14 = _p13._0;
+				return _user$project$Realm$isEmpty(_p14) ? {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none} : {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{realm: _p15}),
+						{realm: _p14}),
 					_1: _user$project$Champion$isEmpty(model.champion) ? A3(
 						_elm_lang$core$Task$perform,
 						_user$project$Main$Fail,
@@ -10984,12 +10988,12 @@ var _user$project$Main$update = F2(
 var _user$project$Main$Search = function (a) {
 	return {ctor: 'Search', _0: a};
 };
-var _user$project$Main$viewSelect = function (_p16) {
-	var _p17 = _p16;
+var _user$project$Main$viewSelect = function (_p15) {
+	var _p16 = _p15;
 	var keys = A2(
 		_elm_lang$core$Result$withDefault,
 		_elm_lang$core$Dict$empty,
-		_user$project$ChampionList$keys(_p17.all));
+		_user$project$ChampionList$keys(_p16.all));
 	return A2(
 		_elm_lang$html$Html$select,
 		_elm_lang$core$Native_List.fromArray(
@@ -10998,48 +11002,84 @@ var _user$project$Main$viewSelect = function (_p16) {
 			]),
 		A2(
 			_elm_lang$core$List$map,
-			function (_p18) {
-				var _p19 = _p18;
+			function (_p17) {
+				var _p18 = _p17;
 				return A2(
 					_elm_lang$html$Html$option,
 					_elm_lang$core$Native_List.fromArray(
 						[
-							_elm_lang$html$Html_Attributes$value(_p19._0)
+							_elm_lang$html$Html_Attributes$value(_p18._0)
 						]),
 					_elm_lang$core$Native_List.fromArray(
 						[
-							_elm_lang$html$Html$text(_p19._1)
+							_elm_lang$html$Html$text(_p18._1)
 						]));
 			},
 			_elm_lang$core$Dict$toList(keys)));
 };
+var _user$project$Main$Validate = {ctor: 'Validate'};
+var _user$project$Main$init = function (_p19) {
+	var _p20 = _p19;
+	return A2(
+		_user$project$Main$update,
+		_user$project$Main$Validate,
+		{
+			$static: A2(_user$project$Request_Static$new, _user$project$Endpoint$euw, _p20.key),
+			champion: _user$project$Champion$empty,
+			all: _user$project$ChampionList$empty,
+			full: false,
+			realm: _user$project$Realm$empty,
+			currentSkin: 0
+		});
+};
 var _user$project$Main$NewKey = function (a) {
 	return {ctor: 'NewKey', _0: a};
 };
-var _user$project$Main$view = function (_p20) {
-	var _p21 = _p20;
+var _user$project$Main$viewKeyInput = A2(
+	_elm_lang$html$Html$form,
+	_elm_lang$core$Native_List.fromArray(
+		[
+			_elm_lang$html$Html_Events$onSubmit(_user$project$Main$Validate)
+		]),
+	_elm_lang$core$Native_List.fromArray(
+		[
+			A2(
+			_elm_lang$html$Html$input,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html_Attributes$type$('text'),
+					_elm_lang$html$Html_Attributes$placeholder('enter API key'),
+					_elm_lang$html$Html_Events$onInput(_user$project$Main$NewKey)
+				]),
+			_elm_lang$core$Native_List.fromArray(
+				[])),
+			A2(
+			_elm_lang$html$Html$input,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html_Attributes$type$('submit')
+				]),
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html$text('submit')
+				]))
+		]));
+var _user$project$Main$view = function (_p21) {
 	var _p22 = _p21;
+	var _p23 = _p22;
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
 			[]),
 		_elm_lang$core$Native_List.fromArray(
 			[
-				_user$project$ChampionList$isEmpty(_p21.all) ? A2(
-				_elm_lang$html$Html$input,
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html_Attributes$placeholder('enter API key'),
-						_user$project$Main$onChange(_user$project$Main$NewKey)
-					]),
-				_elm_lang$core$Native_List.fromArray(
-					[])) : A2(
+				_user$project$ChampionList$isEmpty(_p22.all) ? _user$project$Main$viewKeyInput : A2(
 				_elm_lang$html$Html$span,
 				_elm_lang$core$Native_List.fromArray(
 					[]),
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_user$project$Main$viewSelect(_p22),
+						_user$project$Main$viewSelect(_p23),
 						A2(
 						_elm_lang$html$Html$button,
 						_elm_lang$core$Native_List.fromArray(
@@ -11067,23 +11107,8 @@ var _user$project$Main$view = function (_p20) {
 					[]),
 				_elm_lang$core$Native_List.fromArray(
 					[])),
-				_user$project$Main$viewChampion(_p22)
+				_user$project$Main$viewChampion(_p23)
 			]));
-};
-var _user$project$Main$init = function (_p23) {
-	var _p24 = _p23;
-	var _p25 = _p24.key;
-	return A2(
-		_user$project$Main$update,
-		_user$project$Main$NewKey(_p25),
-		{
-			$static: A2(_user$project$Request_Static$new, _user$project$Endpoint$euw, _p25),
-			champion: _user$project$Champion$empty,
-			all: _user$project$ChampionList$empty,
-			full: false,
-			realm: _user$project$Realm$empty,
-			currentSkin: 0
-		});
 };
 var _user$project$Main$main = {
 	main: _elm_lang$html$Html_App$programWithFlags(
