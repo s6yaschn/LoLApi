@@ -9745,14 +9745,6 @@ var _evancz$elm_http$Http$post = F3(
 			A2(_evancz$elm_http$Http$send, _evancz$elm_http$Http$defaultSettings, request));
 	});
 
-var _shmookey$cmd_extra$Cmd_Extra$message = function (x) {
-	return A3(
-		_elm_lang$core$Task$perform,
-		_elm_lang$core$Basics$identity,
-		_elm_lang$core$Basics$identity,
-		_elm_lang$core$Task$succeed(x));
-};
-
 var _user$project$Core$emptyModelError = function (func) {
 	return _elm_lang$core$Result$Err(
 		A2(
@@ -11931,208 +11923,218 @@ var _user$project$Main$Search = function (a) {
 };
 var _user$project$Main$update = F2(
 	function (message, model) {
-		var _p16 = message;
-		switch (_p16.ctor) {
-			case 'NewKey':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							$static: A2(_user$project$Request_Static$new, _user$project$Endpoint$euw, _p16._0)
-						}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'Validate':
-				return {
-					ctor: '_Tuple2',
-					_0: model,
-					_1: A3(
-						_elm_lang$core$Task$perform,
-						_user$project$Main$Fail,
-						_user$project$Main$Init,
-						_user$project$Request_Static$getAllChampions(model.$static))
-				};
-			case 'Search':
-				var $new = A2(
-					_elm_lang$core$Maybe$andThen,
-					_elm_lang$core$Result$toMaybe(
-						_user$project$ChampionList$data(model.all)),
-					_elm_lang$core$Dict$get(_p16._0));
-				var old = model.champion;
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							champion: A2(_elm_lang$core$Maybe$withDefault, old, $new),
-							currentSkin: 0
-						}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'Fail':
-				return A2(
-					_elm_lang$core$Debug$log,
-					A3(
-						_elm_lang$core$Basics$flip,
-						_elm_lang$core$String$append,
-						'\n',
-						A2(
-							_elm_lang$core$String$left,
-							50,
-							_elm_lang$core$Basics$toString(_p16._0))),
-					{ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none});
-			case 'Succeed':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{champion: _p16._0, currentSkin: 0}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'Init':
-				var old = model.all;
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{all: _p16._0}),
-					_1: A3(
-						_elm_lang$core$Task$perform,
-						_user$project$Main$Fail,
-						_user$project$Main$NewRealm,
-						_user$project$Request_Static$getRealm(model.$static))
-				};
-			case 'Full':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{full: true}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'Blurb':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{full: false}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'NewRealm':
-				var _p17 = _p16._0;
-				return _user$project$Realm$isEmpty(_p17) ? {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none} : (_user$project$Realm$isEmpty(model.realm) ? {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{realm: _p17}),
-					_1: A3(
-						_elm_lang$core$Task$perform,
-						_user$project$Main$Fail,
-						_user$project$Main$InitLanguages,
-						_user$project$Request_Static$getLanguages(model.$static))
-				} : {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{realm: _p17}),
-					_1: _shmookey$cmd_extra$Cmd_Extra$message(_user$project$Main$Refresh)
-				});
-			case 'NextSkin':
-				var max = A2(
-					_elm_lang$core$Result$withDefault,
-					0,
-					A2(
-						_elm_lang$core$Result$map,
-						_elm_lang$core$List$length,
-						_user$project$Champion$skins(model.champion)));
-				var old = model.currentSkin;
-				return (_elm_lang$core$Native_Utils.cmp(old, max - 1) > -1) ? {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none} : {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{currentSkin: old + 1}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'PreviousSkin':
-				var old = model.currentSkin;
-				return (_elm_lang$core$Native_Utils.cmp(old, 0) < 1) ? {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none} : {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{currentSkin: old - 1}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'NewRegion':
-				var _p18 = _p16._0;
-				var $new = A2(
-					_elm_lang$core$Maybe$withDefault,
-					A2(
+		update:
+		while (true) {
+			var _p16 = message;
+			switch (_p16.ctor) {
+				case 'NewKey':
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								$static: A2(_user$project$Request_Static$new, _user$project$Endpoint$euw, _p16._0)
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				case 'Validate':
+					return {
+						ctor: '_Tuple2',
+						_0: model,
+						_1: A3(
+							_elm_lang$core$Task$perform,
+							_user$project$Main$Fail,
+							_user$project$Main$Init,
+							_user$project$Request_Static$getAllChampions(model.$static))
+					};
+				case 'Search':
+					var $new = A2(
+						_elm_lang$core$Maybe$andThen,
+						_elm_lang$core$Result$toMaybe(
+							_user$project$ChampionList$data(model.all)),
+						_elm_lang$core$Dict$get(_p16._0));
+					var old = model.champion;
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								champion: A2(_elm_lang$core$Maybe$withDefault, old, $new),
+								currentSkin: 0
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				case 'Fail':
+					return A2(
 						_elm_lang$core$Debug$log,
+						A3(
+							_elm_lang$core$Basics$flip,
+							_elm_lang$core$String$append,
+							'\n',
+							A2(
+								_elm_lang$core$String$left,
+								50,
+								_elm_lang$core$Basics$toString(_p16._0))),
+						{ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none});
+				case 'Succeed':
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{champion: _p16._0, currentSkin: 0}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				case 'Init':
+					var old = model.all;
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{all: _p16._0}),
+						_1: A3(
+							_elm_lang$core$Task$perform,
+							_user$project$Main$Fail,
+							_user$project$Main$NewRealm,
+							_user$project$Request_Static$getRealm(model.$static))
+					};
+				case 'Full':
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{full: true}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				case 'Blurb':
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{full: false}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				case 'NewRealm':
+					var _p17 = _p16._0;
+					if (_user$project$Realm$isEmpty(_p17)) {
+						return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+					} else {
+						if (_user$project$Realm$isEmpty(model.realm)) {
+							return {
+								ctor: '_Tuple2',
+								_0: _elm_lang$core$Native_Utils.update(
+									model,
+									{realm: _p17}),
+								_1: A3(
+									_elm_lang$core$Task$perform,
+									_user$project$Main$Fail,
+									_user$project$Main$InitLanguages,
+									_user$project$Request_Static$getLanguages(model.$static))
+							};
+						} else {
+							var _v8 = _user$project$Main$Refresh,
+								_v9 = _elm_lang$core$Native_Utils.update(
+								model,
+								{realm: _p17});
+							message = _v8;
+							model = _v9;
+							continue update;
+						}
+					}
+				case 'NextSkin':
+					var max = A2(
+						_elm_lang$core$Result$withDefault,
+						0,
 						A2(
-							_elm_lang$core$Basics_ops['++'],
-							'lookup failed ',
+							_elm_lang$core$Result$map,
+							_elm_lang$core$List$length,
+							_user$project$Champion$skins(model.champion)));
+					var old = model.currentSkin;
+					return (_elm_lang$core$Native_Utils.cmp(old, max - 1) > -1) ? {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none} : {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{currentSkin: old + 1}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				case 'PreviousSkin':
+					var old = model.currentSkin;
+					return (_elm_lang$core$Native_Utils.cmp(old, 0) < 1) ? {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none} : {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{currentSkin: old - 1}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				case 'NewRegion':
+					var _p18 = _p16._0;
+					var $new = A2(
+						_elm_lang$core$Maybe$withDefault,
+						A2(
+							_elm_lang$core$Debug$log,
 							A2(
 								_elm_lang$core$Basics_ops['++'],
-								_p18,
+								'lookup failed ',
 								A2(
 									_elm_lang$core$Basics_ops['++'],
-									' ',
-									_elm_lang$core$Basics$toString(_user$project$Main$regions)))),
-						_user$project$Request_Static$endpoint(model.$static)),
-					A2(_elm_lang$core$Dict$get, _p18, _user$project$Main$regions));
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							$static: A2(_user$project$Request_Static$updateEndpoint, model.$static, $new),
-							currentLanguage: A2(
-								_elm_lang$core$Maybe$withDefault,
-								'en_US',
-								_elm_lang$core$List$head(model.languages))
-						}),
-					_1: A3(
-						_elm_lang$core$Task$perform,
-						_user$project$Main$Fail,
-						_user$project$Main$NewRealm,
-						_user$project$Request_Static$getRealm(model.$static))
-				};
-			case 'NewLanguage':
-				var _p19 = _p16._0;
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{currentLanguage: _p19}),
-					_1: A3(
-						_elm_lang$core$Task$perform,
-						_user$project$Main$Fail,
-						_user$project$Main$Init,
-						A2(_user$project$Request_Static$getAllChampionsLoc, _p19, model.$static))
-				};
-			case 'InitLanguages':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{languages: _p16._0}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			default:
-				var name = A2(
-					_elm_lang$core$Debug$log,
-					'Refresh',
-					A2(
-						_elm_lang$core$Result$withDefault,
-						'',
-						_user$project$Champion$name(model.champion)));
-				return {
-					ctor: '_Tuple2',
-					_0: model,
-					_1: _shmookey$cmd_extra$Cmd_Extra$message(
-						_user$project$Main$Search(name))
-				};
+									_p18,
+									A2(
+										_elm_lang$core$Basics_ops['++'],
+										' ',
+										_elm_lang$core$Basics$toString(_user$project$Main$regions)))),
+							_user$project$Request_Static$endpoint(model.$static)),
+						A2(_elm_lang$core$Dict$get, _p18, _user$project$Main$regions));
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								$static: A2(_user$project$Request_Static$updateEndpoint, model.$static, $new),
+								currentLanguage: A2(
+									_elm_lang$core$Maybe$withDefault,
+									'en_US',
+									_elm_lang$core$List$head(model.languages))
+							}),
+						_1: A3(
+							_elm_lang$core$Task$perform,
+							_user$project$Main$Fail,
+							_user$project$Main$NewRealm,
+							_user$project$Request_Static$getRealm(model.$static))
+					};
+				case 'NewLanguage':
+					var _p19 = _p16._0;
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{currentLanguage: _p19}),
+						_1: A3(
+							_elm_lang$core$Task$perform,
+							_user$project$Main$Fail,
+							_user$project$Main$Init,
+							A2(_user$project$Request_Static$getAllChampionsLoc, _p19, model.$static))
+					};
+				case 'InitLanguages':
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{languages: _p16._0}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				default:
+					var key = A2(
+						_elm_lang$core$Debug$log,
+						'Refresh',
+						A2(
+							_elm_lang$core$Result$withDefault,
+							'',
+							_user$project$Champion$key(model.champion)));
+					var _v10 = _user$project$Main$Search(key),
+						_v11 = model;
+					message = _v10;
+					model = _v11;
+					continue update;
+			}
 		}
 	});
 var _user$project$Main$viewChampionSelect = function (_p20) {
