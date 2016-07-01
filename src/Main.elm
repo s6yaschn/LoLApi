@@ -52,6 +52,7 @@ type alias Model =
 
 type Msg
     = NewKey String
+    | Validate
     | Search String
     | Fail Http.Error
     | Succeed Champion.Model
@@ -66,9 +67,11 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
     case message of
-        -- TODO: remove redundancy due to flags
         NewKey key ->
-            ( { model | static = Request.Static.new Endpoint.euw key }, Task.perform Fail Init <| Request.Static.getAllChampions <| Request.Static.new Endpoint.euw key )
+            ( { model | static = Request.Static.new Endpoint.euw key }, Cmd.none )
+
+        Validate ->
+            ( model, Task.perform Fail Init <| Request.Static.getAllChampions model.static )
 
         Search s ->
             let
@@ -143,11 +146,7 @@ view : Model -> Html Msg
 view ({ all } as model) =
     div []
         [ if ChampionList.isEmpty all then
-            input
-                [ placeholder "enter API key"
-                , onChange NewKey
-                ]
-                []
+            viewKeyInput
           else
             span []
                 [ viewSelect model
@@ -174,7 +173,7 @@ subscriptions model =
 
 init : Flags -> ( Model, Cmd Msg )
 init { key } =
-    update (NewKey key)
+    update (Validate)
         { static = Request.Static.new Endpoint.euw key
         , champion = Champion.empty
         , all = ChampionList.empty
@@ -191,6 +190,19 @@ init { key } =
 onChange : (String -> msg) -> Attribute msg
 onChange tagger =
     on "change" (Json.map tagger targetValue)
+
+
+viewKeyInput : Html Msg
+viewKeyInput =
+    Html.form [ onSubmit Validate ]
+        [ input
+            [ type' "text"
+            , placeholder "enter API key"
+            , onInput NewKey
+            ]
+            []
+        , input [ type' "submit" ] [ text "submit" ]
+        ]
 
 
 viewSelect : Model -> Html Msg
