@@ -9,7 +9,7 @@ import Champion
 import Realm
 import ChampionList
 import Task exposing (Task)
-
+import Dict exposing (Dict)
 
 -- CONSTANTS
 
@@ -33,26 +33,41 @@ new : Endpoint.Model -> String -> Model
 new reg key =
     Model <| Static reg key
 
+endpoint : Model -> Endpoint.Model
+endpoint (Model {endpoint}) = endpoint
 
+updateEndpoint : Model -> Endpoint.Model -> Model
+updateEndpoint (Model model) new = Model {model | endpoint = new } 
 
 -- REQUESTS
-
 
 getRealm : Model -> Task Http.Error Realm.Model
 getRealm model =
     request model Realm.decoder "realm"
-
 
 getChampionById : Model -> Int -> Task Http.Error Champion.Model
 getChampionById model id =
     request model Champion.decoder <| "champion/" ++ toString id ++ "?champData=all"
 
 
+getChampionByIdLoc : String -> Model -> Int -> Task Http.Error Champion.Model
+getChampionByIdLoc lang model id =
+    request model Champion.decoder <| "champion/" ++ toString id ++ "?champData=all&locale=" ++ lang
+
 getAllChampions : Model -> Task Http.Error ChampionList.Model
 getAllChampions model =
     request model ChampionList.decoder "champion?champData=all"
 
+getAllChampionsLoc : String -> Model -> Task Http.Error ChampionList.Model
+getAllChampionsLoc lang model =
+    request model ChampionList.decoder <| "champion?champData=all&locale=" ++ lang
 
+getLanguages : Model -> Task Http.Error (List String)
+getLanguages model = request model (Json.list Json.string) "languages"
+
+getLanguageStrings : Model -> String -> Task Http.Error (Dict String String)
+getLanguageStrings model lang =
+    request model ("data" := Json.dict Json.string) <| "language-strings?locale=" ++ lang
 
 -- HTTP
 
@@ -76,4 +91,4 @@ request (Model { endpoint, key }) decoder request =
                     "?api_key=" ++ key
     in
         -- Debug
-        Http.get decoder (log url url)
+        Http.get decoder (log "Request" url)

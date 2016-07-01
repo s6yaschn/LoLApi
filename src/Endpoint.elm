@@ -1,4 +1,15 @@
-module Endpoint exposing (Model, region, platformID, host, global, br, eune, euw)
+module Endpoint
+    exposing
+        ( Model
+        , region
+        , platformID
+        , host
+        , global
+        , br
+        , eune
+        , euw
+        , jp
+        )
 
 
 type Model
@@ -41,7 +52,7 @@ br =
         , host = "br.api.pvp.net"
         }
 
- 
+
 eune : Model
 eune =
     Model
@@ -57,4 +68,13 @@ euw =
         { region = "euw"
         , platformID = "euw1"
         , host = "euw.api.pvp.net"
+        }
+
+
+jp : Model
+jp =
+    Model
+        { region = "jp"
+        , platformID = "jp1"
+        , host = "jp.api.pvp.net"
         }

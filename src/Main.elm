@@ -15,11 +15,13 @@ import List.Extra
 import Result
 import Task
 import Http
-import Dict
+import Dict exposing (Dict)
 import Result exposing (andThen)
 import List
 import Json.Decode as Json
 import Skin
+import Cmd.Extra
+import String
 
 
 type alias Flags =
@@ -44,7 +46,23 @@ type alias Model =
     , full : Bool
     , realm : Realm.Model
     , currentSkin : Int
+    , currentLanguage : String
+    , languages : List String
     }
+
+
+
+-- TODO: clarity
+
+
+endpoints : List Endpoint.Model
+endpoints =
+    [ Endpoint.euw, Endpoint.eune, Endpoint.br, Endpoint.jp ]
+
+
+regions : Dict String Endpoint.Model
+regions =
+    Dict.fromList <| List.Extra.zip (List.map Endpoint.region endpoints) endpoints
 
 
 
@@ -63,6 +81,10 @@ type Msg
     | NewRealm Realm.Model
     | PreviousSkin
     | NextSkin
+    | NewRegion String
+    | NewLanguage String
+    | InitLanguages (List String)
+    | Refresh
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -85,7 +107,7 @@ update message model =
                 ( { model | champion = Maybe.withDefault old new, currentSkin = 0 }, Cmd.none )
 
         Fail err ->
-            Debug.log (toString err) <|
+            Debug.log (flip String.append "\n" <| String.left 50 <| toString err) <|
                 ( model, Cmd.none )
 
         Succeed champ ->
@@ -96,11 +118,13 @@ update message model =
                 old =
                     model.all
             in
-                if ChampionList.isEmpty old then
-                    ( { model | all = new }, Task.perform Fail NewRealm <| Request.Static.getRealm model.static )
-                else
-                    ( model, Cmd.none )
+                ( { model | all = new }, Task.perform Fail NewRealm <| Request.Static.getRealm model.static )
 
+        {- if ChampionList.isEmpty old then
+               ( { model | all = new }, Task.perform Fail NewRealm <| Request.Static.getRealm model.static )
+           else
+               ( model, Cmd.none )
+        -}
         Full ->
             ( { model | full = True }, Cmd.none )
 
@@ -110,8 +134,12 @@ update message model =
         NewRealm new ->
             if Realm.isEmpty new then
                 ( model, Cmd.none )
+            else if Realm.isEmpty model.realm then
+                ( { model | realm = new }, Task.perform Fail InitLanguages <| Request.Static.getLanguages model.static )
             else
-                ( { model | realm = new }, Cmd.none )
+                ( { model | realm = new }
+                , Cmd.Extra.message Refresh
+                )
 
         NextSkin ->
             let
@@ -136,19 +164,42 @@ update message model =
                 else
                     ( { model | currentSkin = old - 1 }, Cmd.none )
 
+        NewRegion regio ->
+            let
+                new =
+                    Maybe.withDefault (Debug.log ("lookup failed " ++ regio ++ " " ++ toString regions) <| Request.Static.endpoint model.static) (Dict.get regio regions)
+            in
+                ( { model | static = Request.Static.updateEndpoint model.static new, currentLanguage = Maybe.withDefault "en_US" (List.head model.languages) }, Task.perform Fail NewRealm <| Request.Static.getRealm model.static )
+
+        NewLanguage lang ->
+            ( { model | currentLanguage = lang }, Task.perform Fail Init <| Request.Static.getAllChampionsLoc lang model.static )
+
+        InitLanguages langs ->
+            ( { model | languages = langs }, Cmd.none )
+
+        Refresh ->
+            let
+                name =
+                    Debug.log "Refresh" <| Result.withDefault "" (Champion.name model.champion)
+            in
+                ( model, Cmd.Extra.message (Search name) )
+
 
 
 -- VIEW
 
 
 view : Model -> Html Msg
-view ({ all } as model) =
+view ({ all, currentLanguage } as model) =
     div []
         [ if ChampionList.isEmpty all then
             viewKeyInput
+          else if currentLanguage == "" then
+            viewRegionSelect
           else
             span []
-                [ viewSelect model
+                [ viewChampionSelect model
+                , viewLanguageSelect model
                 , button [ onClick PreviousSkin ] [ text "previous skin" ]
                 , button [ onClick NextSkin ] [ text "nextSkin" ]
                 ]
@@ -179,6 +230,8 @@ init { key } =
         , full = False
         , realm = Realm.empty
         , currentSkin = 0
+        , languages = []
+        , currentLanguage = ""
         }
 
 
@@ -204,8 +257,8 @@ viewKeyInput =
         ]
 
 
-viewSelect : Model -> Html Msg
-viewSelect { all } =
+viewChampionSelect : Model -> Html Msg
+viewChampionSelect { all } =
     let
         keys =
             Dict.values <| Result.withDefault Dict.empty <| ChampionList.keys all
@@ -219,8 +272,17 @@ viewSelect { all } =
         select [ onChange Search, required True ] <|
             List.append [ option [ value "", selected True, hidden True ] [ text "Select a Champion:" ] ] <|
                 List.map (\( key, name ) -> option [ value key ] [ text name ]) <|
-                    List.sortBy snd <|
-                        List.Extra.zip keys (List.map keyToName keys)
+                    List.sortBy snd (List.Extra.zip keys (List.map keyToName keys))
+
+
+viewRegionSelect : Html Msg
+viewRegionSelect =
+    select [ onChange NewRegion ] <| List.map (\x -> option [ value x ] [ text x ]) (Dict.keys regions)
+
+
+viewLanguageSelect : Model -> Html Msg
+viewLanguageSelect { languages } =
+    select [ onChange NewLanguage ] <| List.map (\x -> option [ value x ] [ text x ]) languages
 
 
 viewChampion : Model -> Html Msg

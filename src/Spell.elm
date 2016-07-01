@@ -90,8 +90,8 @@ championSpell =
         |: ("rangeBurn" := string)
         |: withDefault "" ("resource" := string)
         |: ("sanitizedDescription" := string)
-        |: ("sanitizedTooltip" := string)
-        |: ("tooltip" := string)
+        |: withDefault "" ("sanitizedTooltip" := string)
+        |: withDefault "" ("tooltip" := string)
         |: withDefault [] ("vars" := list SpellVars.decoder)
 
 
