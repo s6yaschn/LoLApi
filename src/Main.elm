@@ -111,12 +111,7 @@ update message model =
             if Realm.isEmpty new then
                 ( model, Cmd.none )
             else
-                ( { model | realm = new }
-                , if Champion.isEmpty model.champion then
-                    Task.perform Fail Succeed <| Request.Static.getChampionById model.static 1
-                  else
-                    Cmd.none
-                )
+                ( { model | realm = new }, Cmd.none )
 
         NextSkin ->
             let
@@ -221,10 +216,11 @@ viewSelect { all } =
         keyToName k =
             Maybe.withDefault k <| (Dict.get k data) `Maybe.andThen` (Result.toMaybe << Champion.name)
     in
-        select [ onChange Search ] <|
-            List.map (\( key, name ) -> option [ value key ] [ text name ]) <|
-                List.sortBy snd <|
-                    List.Extra.zip keys (List.map keyToName keys)
+        select [ onChange Search, required True ] <|
+            List.append [ option [ value "", selected True, hidden True ] [ text "Select a Champion:" ] ] <|
+                List.map (\( key, name ) -> option [ value key ] [ text name ]) <|
+                    List.sortBy snd <|
+                        List.Extra.zip keys (List.map keyToName keys)
 
 
 viewChampion : Model -> Html Msg
