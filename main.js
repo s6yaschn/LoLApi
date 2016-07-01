@@ -11886,11 +11886,7 @@ var _user$project$Main$update = F2(
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{realm: _p15}),
-					_1: _user$project$Champion$isEmpty(model.champion) ? A3(
-						_elm_lang$core$Task$perform,
-						_user$project$Main$Fail,
-						_user$project$Main$Succeed,
-						A2(_user$project$Request_Static$getChampionById, model.$static, 1)) : _elm_lang$core$Platform_Cmd$none
+					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'NextSkin':
 				var max = A2(
@@ -11950,30 +11946,48 @@ var _user$project$Main$viewSelect = function (_p16) {
 		_elm_lang$html$Html$select,
 		_elm_lang$core$Native_List.fromArray(
 			[
-				_user$project$Main$onChange(_user$project$Main$Search)
+				_user$project$Main$onChange(_user$project$Main$Search),
+				_elm_lang$html$Html_Attributes$required(true)
 			]),
 		A2(
-			_elm_lang$core$List$map,
-			function (_p19) {
-				var _p20 = _p19;
-				return A2(
+			_elm_lang$core$List$append,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					A2(
 					_elm_lang$html$Html$option,
 					_elm_lang$core$Native_List.fromArray(
 						[
-							_elm_lang$html$Html_Attributes$value(_p20._0)
+							_elm_lang$html$Html_Attributes$value(''),
+							_elm_lang$html$Html_Attributes$selected(true),
+							_elm_lang$html$Html_Attributes$hidden(true)
 						]),
 					_elm_lang$core$Native_List.fromArray(
 						[
-							_elm_lang$html$Html$text(_p20._1)
-						]));
-			},
+							_elm_lang$html$Html$text('Select a Champion:')
+						]))
+				]),
 			A2(
-				_elm_lang$core$List$sortBy,
-				_elm_lang$core$Basics$snd,
+				_elm_lang$core$List$map,
+				function (_p19) {
+					var _p20 = _p19;
+					return A2(
+						_elm_lang$html$Html$option,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$value(_p20._0)
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html$text(_p20._1)
+							]));
+				},
 				A2(
-					_elm_community$list_extra$List_Extra$zip,
-					keys,
-					A2(_elm_lang$core$List$map, keyToName, keys)))));
+					_elm_lang$core$List$sortBy,
+					_elm_lang$core$Basics$snd,
+					A2(
+						_elm_community$list_extra$List_Extra$zip,
+						keys,
+						A2(_elm_lang$core$List$map, keyToName, keys))))));
 };
 var _user$project$Main$Validate = {ctor: 'Validate'};
 var _user$project$Main$init = function (_p22) {
