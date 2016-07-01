@@ -9745,6 +9745,14 @@ var _evancz$elm_http$Http$post = F3(
 			A2(_evancz$elm_http$Http$send, _evancz$elm_http$Http$defaultSettings, request));
 	});
 
+var _shmookey$cmd_extra$Cmd_Extra$message = function (x) {
+	return A3(
+		_elm_lang$core$Task$perform,
+		_elm_lang$core$Basics$identity,
+		_elm_lang$core$Basics$identity,
+		_elm_lang$core$Task$succeed(x));
+};
+
 var _user$project$Core$emptyModelError = function (func) {
 	return _elm_lang$core$Result$Err(
 		A2(
@@ -10579,8 +10587,14 @@ var _user$project$Spell$championSpell = A2(
 						'',
 						A2(_elm_lang$core$Json_Decode_ops[':='], 'resource', _elm_lang$core$Json_Decode$string))),
 				A2(_elm_lang$core$Json_Decode_ops[':='], 'sanitizedDescription', _elm_lang$core$Json_Decode$string)),
-			A2(_elm_lang$core$Json_Decode_ops[':='], 'sanitizedTooltip', _elm_lang$core$Json_Decode$string)),
-		A2(_elm_lang$core$Json_Decode_ops[':='], 'tooltip', _elm_lang$core$Json_Decode$string)),
+			A2(
+				_elm_community$json_extra$Json_Decode_Extra$withDefault,
+				'',
+				A2(_elm_lang$core$Json_Decode_ops[':='], 'sanitizedTooltip', _elm_lang$core$Json_Decode$string))),
+		A2(
+			_elm_community$json_extra$Json_Decode_Extra$withDefault,
+			'',
+			A2(_elm_lang$core$Json_Decode_ops[':='], 'tooltip', _elm_lang$core$Json_Decode$string))),
 	A2(
 		_elm_community$json_extra$Json_Decode_Extra$withDefault,
 		_elm_lang$core$Native_List.fromArray(
@@ -11467,13 +11481,19 @@ var _user$project$Endpoint$eune = _user$project$Endpoint$Model(
 	{region: 'eune', platformID: 'eun1', host: 'eune.api.pvp.net'});
 var _user$project$Endpoint$euw = _user$project$Endpoint$Model(
 	{region: 'euw', platformID: 'euw1', host: 'euw.api.pvp.net'});
+var _user$project$Endpoint$jp = _user$project$Endpoint$Model(
+	{region: 'jp', platformID: 'jp1', host: 'jp.api.pvp.net'});
 
+var _user$project$Request_Static$endpoint = function (_p0) {
+	var _p1 = _p0;
+	return _p1._0.endpoint;
+};
 var _user$project$Request_Static$version = 'v1.2';
 var _user$project$Request_Static$request = F3(
-	function (_p0, decoder, request) {
-		var _p1 = _p0;
-		var _p2 = _p1._0.key;
-		var reg = _user$project$Endpoint$region(_p1._0.endpoint);
+	function (_p2, decoder, request) {
+		var _p3 = _p2;
+		var _p4 = _p3._0.key;
+		var reg = _user$project$Endpoint$region(_p3._0.endpoint);
 		var url = A2(
 			_elm_lang$core$Basics_ops['++'],
 			'https://global.api.pvp.net/api/lol/static-data/',
@@ -11492,11 +11512,11 @@ var _user$project$Request_Static$request = F3(
 							A2(
 								_elm_lang$core$Basics_ops['++'],
 								request,
-								A2(_elm_lang$core$String$contains, '?', request) ? A2(_elm_lang$core$Basics_ops['++'], '&api_key=', _p2) : A2(_elm_lang$core$Basics_ops['++'], '?api_key=', _p2)))))));
+								A2(_elm_lang$core$String$contains, '?', request) ? A2(_elm_lang$core$Basics_ops['++'], '&api_key=', _p4) : A2(_elm_lang$core$Basics_ops['++'], '?api_key=', _p4)))))));
 		return A2(
 			_evancz$elm_http$Http$get,
 			decoder,
-			A2(_elm_lang$core$Debug$log, url, url));
+			A2(_elm_lang$core$Debug$log, 'Request', url));
 	});
 var _user$project$Request_Static$getRealm = function (model) {
 	return A3(_user$project$Request_Static$request, model, _user$project$Realm$decoder, 'realm');
@@ -11515,9 +11535,49 @@ var _user$project$Request_Static$getChampionById = F2(
 					_elm_lang$core$Basics$toString(id),
 					'?champData=all')));
 	});
+var _user$project$Request_Static$getChampionByIdLoc = F3(
+	function (lang, model, id) {
+		return A3(
+			_user$project$Request_Static$request,
+			model,
+			_user$project$Champion$decoder,
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				'champion/',
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					_elm_lang$core$Basics$toString(id),
+					A2(_elm_lang$core$Basics_ops['++'], '?champData=all&locale=', lang))));
+	});
 var _user$project$Request_Static$getAllChampions = function (model) {
 	return A3(_user$project$Request_Static$request, model, _user$project$ChampionList$decoder, 'champion?champData=all');
 };
+var _user$project$Request_Static$getAllChampionsLoc = F2(
+	function (lang, model) {
+		return A3(
+			_user$project$Request_Static$request,
+			model,
+			_user$project$ChampionList$decoder,
+			A2(_elm_lang$core$Basics_ops['++'], 'champion?champData=all&locale=', lang));
+	});
+var _user$project$Request_Static$getLanguages = function (model) {
+	return A3(
+		_user$project$Request_Static$request,
+		model,
+		_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string),
+		'languages');
+};
+var _user$project$Request_Static$getLanguageStrings = F2(
+	function (model, lang) {
+		return A3(
+			_user$project$Request_Static$request,
+			model,
+			A2(
+				_elm_lang$core$Json_Decode_ops[':='],
+				'data',
+				_elm_lang$core$Json_Decode$dict(_elm_lang$core$Json_Decode$string)),
+			A2(_elm_lang$core$Basics_ops['++'], 'language-strings?locale=', lang));
+	});
 var _user$project$Request_Static$Static = F2(
 	function (a, b) {
 		return {endpoint: a, key: b};
@@ -11529,6 +11589,14 @@ var _user$project$Request_Static$new = F2(
 	function (reg, key) {
 		return _user$project$Request_Static$Model(
 			A2(_user$project$Request_Static$Static, reg, key));
+	});
+var _user$project$Request_Static$updateEndpoint = F2(
+	function (_p5, $new) {
+		var _p6 = _p5;
+		return _user$project$Request_Static$Model(
+			_elm_lang$core$Native_Utils.update(
+				_p6._0,
+				{endpoint: $new}));
 	});
 
 var _user$project$Main$viewSkin = function (_p0) {
@@ -11663,13 +11731,75 @@ var _user$project$Main$onChange = function (tagger) {
 var _user$project$Main$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$none;
 };
+var _user$project$Main$endpoints = _elm_lang$core$Native_List.fromArray(
+	[_user$project$Endpoint$euw, _user$project$Endpoint$eune, _user$project$Endpoint$br, _user$project$Endpoint$jp]);
+var _user$project$Main$regions = _elm_lang$core$Dict$fromList(
+	A2(
+		_elm_community$list_extra$List_Extra$zip,
+		A2(_elm_lang$core$List$map, _user$project$Endpoint$region, _user$project$Main$endpoints),
+		_user$project$Main$endpoints));
 var _user$project$Main$Flags = function (a) {
 	return {key: a};
 };
-var _user$project$Main$Model = F6(
-	function (a, b, c, d, e, f) {
-		return {$static: a, champion: b, all: c, full: d, realm: e, currentSkin: f};
+var _user$project$Main$Model = F8(
+	function (a, b, c, d, e, f, g, h) {
+		return {$static: a, champion: b, all: c, full: d, realm: e, currentSkin: f, currentLanguage: g, languages: h};
 	});
+var _user$project$Main$Refresh = {ctor: 'Refresh'};
+var _user$project$Main$InitLanguages = function (a) {
+	return {ctor: 'InitLanguages', _0: a};
+};
+var _user$project$Main$NewLanguage = function (a) {
+	return {ctor: 'NewLanguage', _0: a};
+};
+var _user$project$Main$viewLanguageSelect = function (_p10) {
+	var _p11 = _p10;
+	return A2(
+		_elm_lang$html$Html$select,
+		_elm_lang$core$Native_List.fromArray(
+			[
+				_user$project$Main$onChange(_user$project$Main$NewLanguage)
+			]),
+		A2(
+			_elm_lang$core$List$map,
+			function (x) {
+				return A2(
+					_elm_lang$html$Html$option,
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html_Attributes$value(x)
+						]),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html$text(x)
+						]));
+			},
+			_p11.languages));
+};
+var _user$project$Main$NewRegion = function (a) {
+	return {ctor: 'NewRegion', _0: a};
+};
+var _user$project$Main$viewRegionSelect = A2(
+	_elm_lang$html$Html$select,
+	_elm_lang$core$Native_List.fromArray(
+		[
+			_user$project$Main$onChange(_user$project$Main$NewRegion)
+		]),
+	A2(
+		_elm_lang$core$List$map,
+		function (x) {
+			return A2(
+				_elm_lang$html$Html$option,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Attributes$value(x)
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text(x)
+					]));
+		},
+		_elm_lang$core$Dict$keys(_user$project$Main$regions)));
 var _user$project$Main$NextSkin = {ctor: 'NextSkin'};
 var _user$project$Main$PreviousSkin = {ctor: 'PreviousSkin'};
 var _user$project$Main$NewRealm = function (a) {
@@ -11677,14 +11807,14 @@ var _user$project$Main$NewRealm = function (a) {
 };
 var _user$project$Main$Blurb = {ctor: 'Blurb'};
 var _user$project$Main$viewLore = F2(
-	function (attr, _p10) {
-		var _p11 = _p10;
+	function (attr, _p12) {
+		var _p13 = _p12;
 		return A2(
 			_elm_lang$core$Result$withDefault,
 			_elm_lang$html$Html$text(''),
 			A2(
 				_elm_lang$core$Result$andThen,
-				_user$project$Champion$loreFormatted(_p11.champion),
+				_user$project$Champion$loreFormatted(_p13.champion),
 				function (lore) {
 					return _elm_lang$core$Result$Ok(
 						A2(
@@ -11714,14 +11844,14 @@ var _user$project$Main$viewLore = F2(
 	});
 var _user$project$Main$Full = {ctor: 'Full'};
 var _user$project$Main$viewBlurb = F2(
-	function (attr, _p12) {
-		var _p13 = _p12;
+	function (attr, _p14) {
+		var _p15 = _p14;
 		return A2(
 			_elm_lang$core$Result$withDefault,
 			_elm_lang$html$Html$text(''),
 			A2(
 				_elm_lang$core$Result$andThen,
-				_user$project$Champion$blurbFormatted(_p13.champion),
+				_user$project$Champion$blurbFormatted(_p15.champion),
 				function (blurb) {
 					return _elm_lang$core$Result$Ok(
 						A2(
@@ -11796,17 +11926,20 @@ var _user$project$Main$Succeed = function (a) {
 var _user$project$Main$Fail = function (a) {
 	return {ctor: 'Fail', _0: a};
 };
+var _user$project$Main$Search = function (a) {
+	return {ctor: 'Search', _0: a};
+};
 var _user$project$Main$update = F2(
 	function (message, model) {
-		var _p14 = message;
-		switch (_p14.ctor) {
+		var _p16 = message;
+		switch (_p16.ctor) {
 			case 'NewKey':
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							$static: A2(_user$project$Request_Static$new, _user$project$Endpoint$euw, _p14._0)
+							$static: A2(_user$project$Request_Static$new, _user$project$Endpoint$euw, _p16._0)
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
@@ -11825,7 +11958,7 @@ var _user$project$Main$update = F2(
 					_elm_lang$core$Maybe$andThen,
 					_elm_lang$core$Result$toMaybe(
 						_user$project$ChampionList$data(model.all)),
-					_elm_lang$core$Dict$get(_p14._0));
+					_elm_lang$core$Dict$get(_p16._0));
 				var old = model.champion;
 				return {
 					ctor: '_Tuple2',
@@ -11840,29 +11973,36 @@ var _user$project$Main$update = F2(
 			case 'Fail':
 				return A2(
 					_elm_lang$core$Debug$log,
-					_elm_lang$core$Basics$toString(_p14._0),
+					A3(
+						_elm_lang$core$Basics$flip,
+						_elm_lang$core$String$append,
+						'\n',
+						A2(
+							_elm_lang$core$String$left,
+							50,
+							_elm_lang$core$Basics$toString(_p16._0))),
 					{ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none});
 			case 'Succeed':
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{champion: _p14._0, currentSkin: 0}),
+						{champion: _p16._0, currentSkin: 0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'Init':
 				var old = model.all;
-				return _user$project$ChampionList$isEmpty(old) ? {
+				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{all: _p14._0}),
+						{all: _p16._0}),
 					_1: A3(
 						_elm_lang$core$Task$perform,
 						_user$project$Main$Fail,
 						_user$project$Main$NewRealm,
 						_user$project$Request_Static$getRealm(model.$static))
-				} : {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+				};
 			case 'Full':
 				return {
 					ctor: '_Tuple2',
@@ -11880,14 +12020,24 @@ var _user$project$Main$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'NewRealm':
-				var _p15 = _p14._0;
-				return _user$project$Realm$isEmpty(_p15) ? {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none} : {
+				var _p17 = _p16._0;
+				return _user$project$Realm$isEmpty(_p17) ? {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none} : (_user$project$Realm$isEmpty(model.realm) ? {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{realm: _p15}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
+						{realm: _p17}),
+					_1: A3(
+						_elm_lang$core$Task$perform,
+						_user$project$Main$Fail,
+						_user$project$Main$InitLanguages,
+						_user$project$Request_Static$getLanguages(model.$static))
+				} : {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{realm: _p17}),
+					_1: _shmookey$cmd_extra$Cmd_Extra$message(_user$project$Main$Refresh)
+				});
 			case 'NextSkin':
 				var max = A2(
 					_elm_lang$core$Result$withDefault,
@@ -11904,7 +12054,7 @@ var _user$project$Main$update = F2(
 						{currentSkin: old + 1}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
-			default:
+			case 'PreviousSkin':
 				var old = model.currentSkin;
 				return (_elm_lang$core$Native_Utils.cmp(old, 0) < 1) ? {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none} : {
 					ctor: '_Tuple2',
@@ -11913,18 +12063,85 @@ var _user$project$Main$update = F2(
 						{currentSkin: old - 1}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
+			case 'NewRegion':
+				var _p18 = _p16._0;
+				var $new = A2(
+					_elm_lang$core$Maybe$withDefault,
+					A2(
+						_elm_lang$core$Debug$log,
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							'lookup failed ',
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								_p18,
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									' ',
+									_elm_lang$core$Basics$toString(_user$project$Main$regions)))),
+						_user$project$Request_Static$endpoint(model.$static)),
+					A2(_elm_lang$core$Dict$get, _p18, _user$project$Main$regions));
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							$static: A2(_user$project$Request_Static$updateEndpoint, model.$static, $new),
+							currentLanguage: A2(
+								_elm_lang$core$Maybe$withDefault,
+								'en_US',
+								_elm_lang$core$List$head(model.languages))
+						}),
+					_1: A3(
+						_elm_lang$core$Task$perform,
+						_user$project$Main$Fail,
+						_user$project$Main$NewRealm,
+						_user$project$Request_Static$getRealm(model.$static))
+				};
+			case 'NewLanguage':
+				var _p19 = _p16._0;
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{currentLanguage: _p19}),
+					_1: A3(
+						_elm_lang$core$Task$perform,
+						_user$project$Main$Fail,
+						_user$project$Main$Init,
+						A2(_user$project$Request_Static$getAllChampionsLoc, _p19, model.$static))
+				};
+			case 'InitLanguages':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{languages: _p16._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				var name = A2(
+					_elm_lang$core$Debug$log,
+					'Refresh',
+					A2(
+						_elm_lang$core$Result$withDefault,
+						'',
+						_user$project$Champion$name(model.champion)));
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: _shmookey$cmd_extra$Cmd_Extra$message(
+						_user$project$Main$Search(name))
+				};
 		}
 	});
-var _user$project$Main$Search = function (a) {
-	return {ctor: 'Search', _0: a};
-};
-var _user$project$Main$viewSelect = function (_p16) {
-	var _p17 = _p16;
-	var _p21 = _p17.all;
+var _user$project$Main$viewChampionSelect = function (_p20) {
+	var _p21 = _p20;
+	var _p25 = _p21.all;
 	var data = A2(
 		_elm_lang$core$Result$withDefault,
 		_elm_lang$core$Dict$empty,
-		_user$project$ChampionList$data(_p21));
+		_user$project$ChampionList$data(_p25));
 	var keyToName = function (k) {
 		return A2(
 			_elm_lang$core$Maybe$withDefault,
@@ -11932,16 +12149,16 @@ var _user$project$Main$viewSelect = function (_p16) {
 			A2(
 				_elm_lang$core$Maybe$andThen,
 				A2(_elm_lang$core$Dict$get, k, data),
-				function (_p18) {
+				function (_p22) {
 					return _elm_lang$core$Result$toMaybe(
-						_user$project$Champion$name(_p18));
+						_user$project$Champion$name(_p22));
 				}));
 	};
 	var keys = _elm_lang$core$Dict$values(
 		A2(
 			_elm_lang$core$Result$withDefault,
 			_elm_lang$core$Dict$empty,
-			_user$project$ChampionList$keys(_p21)));
+			_user$project$ChampionList$keys(_p25)));
 	return A2(
 		_elm_lang$html$Html$select,
 		_elm_lang$core$Native_List.fromArray(
@@ -11968,17 +12185,17 @@ var _user$project$Main$viewSelect = function (_p16) {
 				]),
 			A2(
 				_elm_lang$core$List$map,
-				function (_p19) {
-					var _p20 = _p19;
+				function (_p23) {
+					var _p24 = _p23;
 					return A2(
 						_elm_lang$html$Html$option,
 						_elm_lang$core$Native_List.fromArray(
 							[
-								_elm_lang$html$Html_Attributes$value(_p20._0)
+								_elm_lang$html$Html_Attributes$value(_p24._0)
 							]),
 						_elm_lang$core$Native_List.fromArray(
 							[
-								_elm_lang$html$Html$text(_p20._1)
+								_elm_lang$html$Html$text(_p24._1)
 							]));
 				},
 				A2(
@@ -11990,18 +12207,21 @@ var _user$project$Main$viewSelect = function (_p16) {
 						A2(_elm_lang$core$List$map, keyToName, keys))))));
 };
 var _user$project$Main$Validate = {ctor: 'Validate'};
-var _user$project$Main$init = function (_p22) {
-	var _p23 = _p22;
+var _user$project$Main$init = function (_p26) {
+	var _p27 = _p26;
 	return A2(
 		_user$project$Main$update,
 		_user$project$Main$Validate,
 		{
-			$static: A2(_user$project$Request_Static$new, _user$project$Endpoint$euw, _p23.key),
+			$static: A2(_user$project$Request_Static$new, _user$project$Endpoint$euw, _p27.key),
 			champion: _user$project$Champion$empty,
 			all: _user$project$ChampionList$empty,
 			full: false,
 			realm: _user$project$Realm$empty,
-			currentSkin: 0
+			currentSkin: 0,
+			languages: _elm_lang$core$Native_List.fromArray(
+				[]),
+			currentLanguage: ''
 		});
 };
 var _user$project$Main$NewKey = function (a) {
@@ -12036,22 +12256,23 @@ var _user$project$Main$viewKeyInput = A2(
 					_elm_lang$html$Html$text('submit')
 				]))
 		]));
-var _user$project$Main$view = function (_p24) {
-	var _p25 = _p24;
-	var _p26 = _p25;
+var _user$project$Main$view = function (_p28) {
+	var _p29 = _p28;
+	var _p30 = _p29;
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
 			[]),
 		_elm_lang$core$Native_List.fromArray(
 			[
-				_user$project$ChampionList$isEmpty(_p25.all) ? _user$project$Main$viewKeyInput : A2(
+				_user$project$ChampionList$isEmpty(_p29.all) ? _user$project$Main$viewKeyInput : (_elm_lang$core$Native_Utils.eq(_p29.currentLanguage, '') ? _user$project$Main$viewRegionSelect : A2(
 				_elm_lang$html$Html$span,
 				_elm_lang$core$Native_List.fromArray(
 					[]),
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_user$project$Main$viewSelect(_p26),
+						_user$project$Main$viewChampionSelect(_p30),
+						_user$project$Main$viewLanguageSelect(_p30),
 						A2(
 						_elm_lang$html$Html$button,
 						_elm_lang$core$Native_List.fromArray(
@@ -12072,14 +12293,14 @@ var _user$project$Main$view = function (_p24) {
 							[
 								_elm_lang$html$Html$text('nextSkin')
 							]))
-					])),
+					]))),
 				A2(
 				_elm_lang$html$Html$br,
 				_elm_lang$core$Native_List.fromArray(
 					[]),
 				_elm_lang$core$Native_List.fromArray(
 					[])),
-				_user$project$Main$viewChampion(_p26)
+				_user$project$Main$viewChampion(_p30)
 			]));
 };
 var _user$project$Main$main = {
