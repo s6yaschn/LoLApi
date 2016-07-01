@@ -23,7 +23,7 @@ import Json.Decode.Extra exposing (..)
 type alias ChampionList =
     { data : Dict String Champion.Model
     , format : String
-    , keys : Dict String String
+    , keys : Dict Int String
     , typ :
         String
         -- originally type
@@ -41,11 +41,11 @@ championList =
     succeed ChampionList
         |: ("data" := dict Champion.decoder)
         |: ("format" := string)
-        |: ("keys" := dict string)
+        |: ("keys" := dict2 int string)
         |: ("type" := string)
         |: ("version" := string)
 
- 
+
 decoder : Decoder Model
 decoder =
     map Model championList
@@ -81,10 +81,7 @@ data m =
 
 
 
---types
-
-
-keys : Model -> Result String (Dict String String)
+keys : Model -> Result String (Dict Int String)
 keys m =
     case m of
         Empty ->
@@ -94,19 +91,15 @@ keys m =
             Ok keys
 
 
-
--- types
-
-
-ids : Model -> Result String (Dict String String)
+ids : Model -> Result String (Dict String Int)
 ids m =
-    let
-        switch =
-            \( a, b ) -> ( b, a )
-    in
-        case m of
-            Empty ->
-                emptyModelError "ChampionList.ids"
+    case m of
+        Empty ->
+            emptyModelError "ChampionList.ids"
 
-            Model { keys } ->
+        Model { keys } ->
+            let
+                switch =
+                    \( a, b ) -> ( b, a )
+            in
                 keys |> Dict.toList |> List.map switch |> Dict.fromList |> Ok

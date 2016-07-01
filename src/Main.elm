@@ -11,7 +11,7 @@ import Html.Events exposing (..)
 import Html.Attributes exposing (..)
 import Html.App
 import Endpoint
-import String
+import List.Extra
 import Result
 import Task
 import Http
@@ -19,6 +19,7 @@ import Dict
 import Result exposing (andThen)
 import List
 import Json.Decode as Json
+import Skin
 
 
 type alias Flags =
@@ -75,10 +76,13 @@ update message model =
 
         Search s ->
             let
-                id =
-                    Result.withDefault -1 <| String.toInt s
+                old =
+                    model.champion
+
+                new =
+                    Result.toMaybe (ChampionList.data model.all) `Maybe.andThen` Dict.get s
             in
-                ( model, Task.perform Fail Succeed <| Request.Static.getChampionById model.static id )
+                ( { model | champion = Maybe.withDefault old new, currentSkin = 0 }, Cmd.none )
 
         Fail err ->
             Debug.log (toString err) <|
@@ -209,11 +213,18 @@ viewSelect : Model -> Html Msg
 viewSelect { all } =
     let
         keys =
-            Result.withDefault Dict.empty <| ChampionList.keys all
+            Dict.values <| Result.withDefault Dict.empty <| ChampionList.keys all
+
+        data =
+            Result.withDefault Dict.empty <| ChampionList.data all
+
+        keyToName k =
+            Maybe.withDefault k <| (Dict.get k data) `Maybe.andThen` (Result.toMaybe << Champion.name)
     in
         select [ onChange Search ] <|
-            List.map (\( x, y ) -> option [ value x ] [ text y ]) <|
-                Dict.toList keys
+            List.map (\( key, name ) -> option [ value key ] [ text name ]) <|
+                List.sortBy snd <|
+                    List.Extra.zip keys (List.map keyToName keys)
 
 
 viewChampion : Model -> Html Msg
@@ -246,11 +257,11 @@ viewHeading attr { champion } =
 viewLore : List (Attribute Msg) -> Model -> Html Msg
 viewLore attr { champion } =
     Result.withDefault (text "") <|
-        andThen (Champion.lore champion) <|
+        andThen (Champion.loreFormatted champion) <|
             \lore ->
                 Ok <|
                     span attr
-                        [ text lore
+                        [ lore
                         , br [] []
                         , button [ onClick Blurb ] [ text "hide lore" ]
                         ]
@@ -259,11 +270,11 @@ viewLore attr { champion } =
 viewBlurb : List (Attribute Msg) -> Model -> Html Msg
 viewBlurb attr { champion } =
     Result.withDefault (text "") <|
-        andThen (Champion.blurb champion) <|
+        andThen (Champion.blurbFormatted champion) <|
             \blurb ->
                 Ok <|
                     span attr
-                        [ text blurb
+                        [ blurb
                         , br [] []
                         , button [ onClick Full ] [ text "show full lore" ]
                         ]
@@ -294,4 +305,11 @@ viewSpells { champion, realm } =
 
 viewSkin : Model -> Html Msg
 viewSkin { champion, currentSkin } =
-    Champion.skinSplashArt currentSkin champion
+    Result.withDefault (text "") <|
+        andThen (Champion.skins champion) <|
+            \skins ->
+                let
+                    s =
+                        Maybe.withDefault Skin.empty (List.Extra.getAt currentSkin skins)
+                in
+                    Ok <| Champion.skinSplashArt s champion

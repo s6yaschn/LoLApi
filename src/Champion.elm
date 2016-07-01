@@ -6,12 +6,14 @@ module Champion
         , decoder
         , allytips
         , blurb
+        , blurbFormatted
         , enemytips
         , id
         , image
         , info
         , key
         , lore
+        , loreFormatted
         , name
         , partype
         , passive
@@ -40,8 +42,8 @@ import Spell
 import Skin
 import Stats
 import Passive
-import Regex exposing (..)
 import Json.Decode.Extra exposing (..)
+import String
 
 
 -- MODEL
@@ -70,7 +72,7 @@ type alias Champion =
     , stats : Stats.Model
     , tags : List String
     , title : String
-    } 
+    }
 
 
 champion : Decoder Champion
@@ -83,7 +85,7 @@ champion =
         |: ("image" := Image.decoder)
         |: ("info" := Info.decoder)
         |: ("key" := string)
-        |: map break ("lore" := string)
+        |: ("lore" := string)
         |: ("name" := string)
         |: ("partype" := string)
         |: ("passive" := Passive.decoder)
@@ -136,7 +138,17 @@ blurb m =
             emptyModelError "Champion.blurb"
 
         Model { blurb } ->
-            Ok blurb
+            Ok (break blurb)
+
+
+blurbFormatted : Model -> Result String (Html msg)
+blurbFormatted m =
+    case m of
+        Empty ->
+            emptyModelError "Champion.blurbFormatted"
+
+        Model { blurb } ->
+            Ok <| span [] <| List.intersperse (br [] []) <| List.map text <| String.split "<br>" blurb
 
 
 enemytips : Model -> Result String (List String)
@@ -196,7 +208,17 @@ lore m =
             emptyModelError "Champion.lore"
 
         Model { lore } ->
-            Ok lore
+            Ok (break lore)
+
+
+loreFormatted : Model -> Result String (Html msg)
+loreFormatted m =
+    case m of
+        Empty ->
+            emptyModelError "Champion.loreFormatted"
+
+        Model { lore } ->
+            Ok <| span [] <| List.intersperse (br [] []) <| List.map text <| String.split "<br>" lore
 
 
 name : Model -> Result String String
@@ -307,8 +329,8 @@ splashArt m =
 -- currently defaults to splashArt if invalid id, make sure to check skin range!
 
 
-skinSplashArt : Int -> Model -> Html a
-skinSplashArt id m =
+skinSplashArt : Skin.Model -> Model -> Html a
+skinSplashArt skin m =
     case m of
         Empty ->
             text ""
@@ -316,7 +338,10 @@ skinSplashArt id m =
         Model model ->
             let
                 valid =
-                    validSkin id model
+                    validSkin skin model
+
+                num =
+                    Result.withDefault 0 (Skin.num skin)
             in
                 img
                     [ src <|
@@ -325,7 +350,7 @@ skinSplashArt id m =
                             ++ model.key
                             ++ "_"
                             ++ (if valid then
-                                    toString id
+                                    toString num
                                 else
                                     "0"
                                )
@@ -345,8 +370,8 @@ loadingScreen m =
             img [ src <| ddragon ++ "/img/champion/loading/" ++ model.key ++ "_0.jpg", alt model.name ] []
 
 
-skinLoadingScreen : Int -> Model -> Html a
-skinLoadingScreen id m =
+skinLoadingScreen : Skin.Model -> Model -> Html a
+skinLoadingScreen skin m =
     case m of
         Empty ->
             text ""
@@ -354,7 +379,10 @@ skinLoadingScreen id m =
         Model model ->
             let
                 valid =
-                    validSkin id model
+                    validSkin skin model
+
+                num =
+                    Result.withDefault 0 (Skin.num skin)
             in
                 img
                     [ src <|
@@ -363,7 +391,7 @@ skinLoadingScreen id m =
                             ++ model.key
                             ++ "_"
                             ++ (if valid then
-                                    toString id
+                                    toString num
                                 else
                                     "0"
                                )
@@ -404,20 +432,11 @@ icon r m =
 -- helper functions
 
 
-validSkin : Int -> Champion -> Bool
-validSkin id champ =
-    List.any
-        (\x ->
-            case Skin.num x of
-                Err _ ->
-                    False
-
-                Ok nr ->
-                    nr == id
-        )
-        champ.skins
+validSkin : Skin.Model -> Champion -> Bool
+validSkin skin { skins } =
+    List.member skin skins
 
 
 break : String -> String
 break =
-    replace All (regex <| escape "<br>") (\_ -> "\n")
+    String.join "\n" << String.split "<br>"
