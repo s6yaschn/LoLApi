@@ -20,7 +20,6 @@ import Result exposing (andThen)
 import List
 import Json.Decode as Json
 import Skin
-import Cmd.Extra
 import String
 
 
@@ -120,11 +119,6 @@ update message model =
             in
                 ( { model | all = new }, Task.perform Fail NewRealm <| Request.Static.getRealm model.static )
 
-        {- if ChampionList.isEmpty old then
-               ( { model | all = new }, Task.perform Fail NewRealm <| Request.Static.getRealm model.static )
-           else
-               ( model, Cmd.none )
-        -}
         Full ->
             ( { model | full = True }, Cmd.none )
 
@@ -137,9 +131,7 @@ update message model =
             else if Realm.isEmpty model.realm then
                 ( { model | realm = new }, Task.perform Fail InitLanguages <| Request.Static.getLanguages model.static )
             else
-                ( { model | realm = new }
-                , Cmd.Extra.message Refresh
-                )
+                update Refresh { model | realm = new }
 
         NextSkin ->
             let
@@ -179,10 +171,10 @@ update message model =
 
         Refresh ->
             let
-                name =
-                    Debug.log "Refresh" <| Result.withDefault "" (Champion.name model.champion)
+                key =
+                    Debug.log "Refresh" <| Result.withDefault "" (Champion.key model.champion)
             in
-                ( model, Cmd.Extra.message (Search name) )
+                update (Search key) model
 
 
 
