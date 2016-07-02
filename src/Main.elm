@@ -63,7 +63,8 @@ regions : Dict String Endpoint.Model
 regions =
     Dict.fromList <| List.Extra.zip (List.map Endpoint.region endpoints) endpoints
 
-
+defaultRegion : Endpoint.Model
+defaultRegion = Endpoint.euw
 
 -- UPDATE
 
@@ -93,7 +94,7 @@ update message model =
             ( { model | static = Request.Static.new Endpoint.euw key }, Cmd.none )
 
         Validate ->
-            ( model, Task.perform Fail Init <| Request.Static.getAllChampions model.static )
+            ( model, Task.perform Fail InitLanguages <| Request.Static.getLanguages model.static )
 
         Search s ->
             let
@@ -126,12 +127,7 @@ update message model =
             ( { model | full = False }, Cmd.none )
 
         NewRealm new ->
-            if Realm.isEmpty new then
-                ( model, Cmd.none )
-            else if Realm.isEmpty model.realm then
-                ( { model | realm = new }, Task.perform Fail InitLanguages <| Request.Static.getLanguages model.static )
-            else
-                update Refresh { model | realm = new }
+            update Refresh { model | realm = new }
 
         NextSkin ->
             let
@@ -159,22 +155,25 @@ update message model =
         NewRegion regio ->
             let
                 new =
-                    Maybe.withDefault (Debug.log ("lookup failed " ++ regio ++ " " ++ toString regions) <| Request.Static.endpoint model.static) (Dict.get regio regions)
+                    Maybe.withDefault (Request.Static.endpoint model.static) (Dict.get regio regions)
             in
-                ( { model | static = Request.Static.updateEndpoint model.static new, currentLanguage = Maybe.withDefault "en_US" (List.head model.languages) }, Task.perform Fail NewRealm <| Request.Static.getRealm model.static )
+                ( { model | static = Request.Static.updateEndpoint model.static new }, Task.perform Fail InitLanguages <| Request.Static.getLanguages model.static )
 
         NewLanguage lang ->
             ( { model | currentLanguage = lang }, Task.perform Fail Init <| Request.Static.getAllChampionsLoc lang model.static )
 
         InitLanguages langs ->
-            ( { model | languages = langs }, Cmd.none )
+            update (NewLanguage <| Maybe.withDefault "en_US" (List.head langs)) { model | languages = langs }
 
         Refresh ->
             let
                 key =
                     Debug.log "Refresh" <| Result.withDefault "" (Champion.key model.champion)
             in
-                update (Search key) model
+                if key /= "" then
+                    update (Search key) model
+                else
+                    ( model, Cmd.none )
 
 
 
@@ -186,11 +185,10 @@ view ({ all, currentLanguage } as model) =
     div []
         [ if ChampionList.isEmpty all then
             viewKeyInput
-          else if currentLanguage == "" then
-            viewRegionSelect
           else
             span []
                 [ viewChampionSelect model
+                , viewRegionSelect model
                 , viewLanguageSelect model
                 , button [ onClick PreviousSkin ] [ text "previous skin" ]
                 , button [ onClick NextSkin ] [ text "nextSkin" ]
@@ -216,7 +214,7 @@ subscriptions model =
 init : Flags -> ( Model, Cmd Msg )
 init { key } =
     update (Validate)
-        { static = Request.Static.new Endpoint.euw key
+        { static = Request.Static.new defaultRegion key
         , champion = Champion.empty
         , all = ChampionList.empty
         , full = False
@@ -267,14 +265,20 @@ viewChampionSelect { all } =
                     List.sortBy snd (List.Extra.zip keys (List.map keyToName keys))
 
 
-viewRegionSelect : Html Msg
-viewRegionSelect =
-    select [ onChange NewRegion ] <| List.map (\x -> option [ value x ] [ text x ]) (Dict.keys regions)
+viewRegionSelect : Model -> Html Msg 
+viewRegionSelect {static} =
+    let 
+        isSelected = (==)  <| Endpoint.region (Request.Static.endpoint static)
+    in
+    select [ onChange NewRegion ] <| List.map (\x -> option [selected (isSelected x), value x ] [ text x ]) (Dict.keys regions)
 
 
 viewLanguageSelect : Model -> Html Msg
-viewLanguageSelect { languages } =
-    select [ onChange NewLanguage ] <| List.map (\x -> option [ value x ] [ text x ]) languages
+viewLanguageSelect { languages, currentLanguage } =
+    let 
+        isSelected = (==) currentLanguage
+    in
+    select [ onChange NewLanguage ] <| List.map (\x -> option [selected (isSelected x), value x ] [ text x ]) languages
 
 
 viewChampion : Model -> Html Msg
