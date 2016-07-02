@@ -248,7 +248,7 @@ viewKeyInput =
 
 
 viewChampionSelect : Model -> Html Msg
-viewChampionSelect { all } =
+viewChampionSelect { all, champion } =
     let
         keys =
             Dict.values <| Result.withDefault Dict.empty <| ChampionList.keys all
@@ -258,10 +258,12 @@ viewChampionSelect { all } =
 
         keyToName k =
             Maybe.withDefault k <| (Dict.get k data) `Maybe.andThen` (Result.toMaybe << Champion.name)
+
+        isSelected  = (==) <| Result.withDefault "" (Champion.key champion) 
     in
         select [ onChange Search, required True ] <|
-            List.append [ option [ value "", selected True, hidden True ] [ text "Select a Champion:" ] ] <|
-                List.map (\( key, name ) -> option [ value key ] [ text name ]) <|
+            List.append [ option [ value "", selected (isSelected ""), hidden True ] [ text "Select a Champion:" ] ] <|
+                List.map (\( key, name ) -> option [selected (isSelected key), value key ] [ text name ]) <|
                     List.sortBy snd (List.Extra.zip keys (List.map keyToName keys))
 
 
