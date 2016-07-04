@@ -11593,7 +11593,7 @@ var _user$project$Request_Static$updateEndpoint = F2(
 
 var _user$project$Main$viewSkin = function (_p0) {
 	var _p1 = _p0;
-	var _p2 = _p1.champion;
+	var _p2 = _p1.currentChampion;
 	return A2(
 		_elm_lang$core$Result$withDefault,
 		_elm_lang$html$Html$text(''),
@@ -11633,7 +11633,7 @@ var _user$project$Main$viewSpells = function (_p3) {
 		_elm_lang$html$Html$text(''),
 		A2(
 			_elm_lang$core$Result$andThen,
-			_user$project$Champion$spells(_p4.champion),
+			_user$project$Champion$spells(_p4.currentChampion),
 			function (spells) {
 				return _elm_lang$core$Result$Ok(
 					A2(
@@ -11653,7 +11653,7 @@ var _user$project$Main$viewPassive = function (_p5) {
 		_elm_lang$html$Html$text(''),
 		A2(
 			_elm_lang$core$Result$andThen,
-			_user$project$Champion$passive(_p6.champion),
+			_user$project$Champion$passive(_p6.currentChampion),
 			function (passive) {
 				return A2(
 					_elm_lang$core$Result$andThen,
@@ -11676,7 +11676,7 @@ var _user$project$Main$viewPassive = function (_p5) {
 var _user$project$Main$viewHeading = F2(
 	function (attr, _p7) {
 		var _p8 = _p7;
-		var _p9 = _p8.champion;
+		var _p9 = _p8.currentChampion;
 		return A2(
 			_elm_lang$core$Result$withDefault,
 			_elm_lang$html$Html$text(''),
@@ -11724,20 +11724,39 @@ var _user$project$Main$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$none;
 };
 var _user$project$Main$defaultRegion = _user$project$Endpoint$euw;
-var _user$project$Main$endpoints = _elm_lang$core$Native_List.fromArray(
-	[_user$project$Endpoint$euw, _user$project$Endpoint$eune, _user$project$Endpoint$br, _user$project$Endpoint$jp]);
-var _user$project$Main$regions = _elm_lang$core$Dict$fromList(
-	A2(
-		_elm_community$list_extra$List_Extra$zip,
-		A2(_elm_lang$core$List$map, _user$project$Endpoint$region, _user$project$Main$endpoints),
-		_user$project$Main$endpoints));
+var _user$project$Main$regions = function () {
+	var endpoints = _elm_lang$core$Native_List.fromArray(
+		[_user$project$Endpoint$euw, _user$project$Endpoint$eune, _user$project$Endpoint$br, _user$project$Endpoint$jp]);
+	return _elm_lang$core$Dict$fromList(
+		A2(
+			_elm_community$list_extra$List_Extra$zip,
+			A2(_elm_lang$core$List$map, _user$project$Endpoint$region, endpoints),
+			endpoints));
+}();
 var _user$project$Main$Flags = function (a) {
 	return {key: a};
 };
-var _user$project$Main$Model = F9(
-	function (a, b, c, d, e, f, g, h, i) {
-		return {$static: a, champion: b, all: c, full: d, realm: e, currentSkin: f, currentLanguage: g, languages: h, loading: i};
-	});
+var _user$project$Main$Model = function (a) {
+	return function (b) {
+		return function (c) {
+			return function (d) {
+				return function (e) {
+					return function (f) {
+						return function (g) {
+							return function (h) {
+								return function (i) {
+									return function (j) {
+										return {$static: a, currentChampion: b, all: c, full: d, realm: e, currentSkin: f, currentLanguage: g, languages: h, loading: i, languageStrings: j};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
 var _user$project$Main$Finish = function (a) {
 	return {ctor: 'Finish', _0: a};
 };
@@ -11745,11 +11764,38 @@ var _user$project$Main$Refresh = {ctor: 'Refresh'};
 var _user$project$Main$InitLanguages = function (a) {
 	return {ctor: 'InitLanguages', _0: a};
 };
+var _user$project$Main$NewLanguageStrings = function (a) {
+	return {ctor: 'NewLanguageStrings', _0: a};
+};
 var _user$project$Main$NewLanguage = function (a) {
 	return {ctor: 'NewLanguage', _0: a};
 };
 var _user$project$Main$viewLanguageSelect = function (_p10) {
 	var _p11 = _p10;
+	var _p12 = _p11.languageStrings;
+	var $native = function (l) {
+		return A2(
+			_elm_lang$core$String$append,
+			A2(_elm_lang$core$Basics_ops['++'], l, ' '),
+			A2(
+				_elm_lang$core$Maybe$withDefault,
+				'',
+				_elm_lang$core$Maybe$oneOf(
+					_elm_lang$core$Native_List.fromArray(
+						[
+							A2(
+							_elm_lang$core$Dict$get,
+							A2(_elm_lang$core$Basics_ops['++'], 'native_', l),
+							_p12),
+							A2(
+							_elm_lang$core$Dict$get,
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								'native_',
+								A2(_elm_lang$core$String$left, 2, l)),
+							_p12)
+						]))));
+	};
 	var isSelected = F2(
 		function (x, y) {
 			return _elm_lang$core$Native_Utils.eq(x, y);
@@ -11773,7 +11819,8 @@ var _user$project$Main$viewLanguageSelect = function (_p10) {
 						]),
 					_elm_lang$core$Native_List.fromArray(
 						[
-							_elm_lang$html$Html$text(x)
+							_elm_lang$html$Html$text(
+							$native(x))
 						]));
 			},
 			_p11.languages));
@@ -11781,14 +11828,14 @@ var _user$project$Main$viewLanguageSelect = function (_p10) {
 var _user$project$Main$NewRegion = function (a) {
 	return {ctor: 'NewRegion', _0: a};
 };
-var _user$project$Main$viewRegionSelect = function (_p12) {
-	var _p13 = _p12;
+var _user$project$Main$viewRegionSelect = function (_p13) {
+	var _p14 = _p13;
 	var isSelected = F2(
 		function (x, y) {
 			return _elm_lang$core$Native_Utils.eq(x, y);
 		})(
 		_user$project$Endpoint$region(
-			_user$project$Request_Static$endpoint(_p13.$static)));
+			_user$project$Request_Static$endpoint(_p14.$static)));
 	return A2(
 		_elm_lang$html$Html$select,
 		_elm_lang$core$Native_List.fromArray(
@@ -11820,14 +11867,14 @@ var _user$project$Main$NewRealm = function (a) {
 };
 var _user$project$Main$Blurb = {ctor: 'Blurb'};
 var _user$project$Main$viewLore = F2(
-	function (attr, _p14) {
-		var _p15 = _p14;
+	function (attr, _p15) {
+		var _p16 = _p15;
 		return A2(
 			_elm_lang$core$Result$withDefault,
 			_elm_lang$html$Html$text(''),
 			A2(
 				_elm_lang$core$Result$andThen,
-				_user$project$Champion$loreFormatted(_p15.champion),
+				_user$project$Champion$loreFormatted(_p16.currentChampion),
 				function (lore) {
 					return _elm_lang$core$Result$Ok(
 						A2(
@@ -11850,21 +11897,25 @@ var _user$project$Main$viewLore = F2(
 										]),
 									_elm_lang$core$Native_List.fromArray(
 										[
-											_elm_lang$html$Html$text('hide lore')
+											_elm_lang$html$Html$text(
+											A2(
+												_elm_lang$core$Maybe$withDefault,
+												'lore',
+												A2(_elm_lang$core$Dict$get, 'Lore', _p16.languageStrings)))
 										]))
 								])));
 				}));
 	});
 var _user$project$Main$Full = {ctor: 'Full'};
 var _user$project$Main$viewBlurb = F2(
-	function (attr, _p16) {
-		var _p17 = _p16;
+	function (attr, _p17) {
+		var _p18 = _p17;
 		return A2(
 			_elm_lang$core$Result$withDefault,
 			_elm_lang$html$Html$text(''),
 			A2(
 				_elm_lang$core$Result$andThen,
-				_user$project$Champion$blurbFormatted(_p17.champion),
+				_user$project$Champion$blurbFormatted(_p18.currentChampion),
 				function (blurb) {
 					return _elm_lang$core$Result$Ok(
 						A2(
@@ -11887,7 +11938,11 @@ var _user$project$Main$viewBlurb = F2(
 										]),
 									_elm_lang$core$Native_List.fromArray(
 										[
-											_elm_lang$html$Html$text('show full lore')
+											_elm_lang$html$Html$text(
+											A2(
+												_elm_lang$core$Maybe$withDefault,
+												'lore',
+												A2(_elm_lang$core$Dict$get, 'Lore', _p18.languageStrings)))
 										]))
 								])));
 				}));
@@ -11927,7 +11982,16 @@ var _user$project$Main$viewChampion = function (model) {
 					[]),
 				_elm_lang$core$Native_List.fromArray(
 					[])),
-				_user$project$Main$viewSkin(model)
+				A2(
+				_elm_lang$html$Html$span,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Attributes$class('fullWidth')
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_user$project$Main$viewSkin(model)
+					]))
 			]));
 };
 var _user$project$Main$Init = function (a) {
@@ -11948,13 +12012,13 @@ var _user$project$Main$load = F3(
 				{loading: true}),
 			_1: A3(
 				_elm_lang$core$Task$perform,
-				function (_p18) {
-					return _user$project$Main$Finish(
-						_user$project$Main$Fail(_p18));
-				},
 				function (_p19) {
 					return _user$project$Main$Finish(
-						tagger(_p19));
+						_user$project$Main$Fail(_p19));
+				},
+				function (_p20) {
+					return _user$project$Main$Finish(
+						tagger(_p20));
 				},
 				task)
 		};
@@ -11966,15 +12030,15 @@ var _user$project$Main$update = F2(
 	function (message, model) {
 		update:
 		while (true) {
-			var _p20 = message;
-			switch (_p20.ctor) {
+			var _p21 = message;
+			switch (_p21.ctor) {
 				case 'NewKey':
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								$static: A2(_user$project$Request_Static$new, _user$project$Endpoint$euw, _p20._0)
+								$static: A2(_user$project$Request_Static$new, _user$project$Endpoint$euw, _p21._0)
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
@@ -11993,14 +12057,14 @@ var _user$project$Main$update = F2(
 						_elm_lang$core$Maybe$andThen,
 						_elm_lang$core$Result$toMaybe(
 							_user$project$ChampionList$data(model.all)),
-						_elm_lang$core$Dict$get(_p20._0));
-					var old = model.champion;
+						_elm_lang$core$Dict$get(_p21._0));
+					var old = model.currentChampion;
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								champion: A2(_elm_lang$core$Maybe$withDefault, old, $new),
+								currentChampion: A2(_elm_lang$core$Maybe$withDefault, old, $new),
 								currentSkin: 0
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
@@ -12015,14 +12079,14 @@ var _user$project$Main$update = F2(
 							A2(
 								_elm_lang$core$String$left,
 								50,
-								_elm_lang$core$Basics$toString(_p20._0))),
+								_elm_lang$core$Basics$toString(_p21._0))),
 						{ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none});
 				case 'Succeed':
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
-							{champion: _p20._0, currentSkin: 0}),
+							{currentChampion: _p21._0, currentSkin: 0}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				case 'Init':
@@ -12031,7 +12095,7 @@ var _user$project$Main$update = F2(
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
-							{all: _p20._0}),
+							{all: _p21._0}),
 						_1: A3(
 							_elm_lang$core$Task$perform,
 							_user$project$Main$Fail,
@@ -12058,7 +12122,7 @@ var _user$project$Main$update = F2(
 					var _v9 = _user$project$Main$Refresh,
 						_v10 = _elm_lang$core$Native_Utils.update(
 						model,
-						{realm: _p20._0});
+						{realm: _p21._0});
 					message = _v9;
 					model = _v10;
 					continue update;
@@ -12069,7 +12133,7 @@ var _user$project$Main$update = F2(
 						A2(
 							_elm_lang$core$Result$map,
 							_elm_lang$core$List$length,
-							_user$project$Champion$skins(model.champion)));
+							_user$project$Champion$skins(model.currentChampion)));
 					var old = model.currentSkin;
 					return (_elm_lang$core$Native_Utils.cmp(old, max - 1) > -1) ? {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none} : {
 						ctor: '_Tuple2',
@@ -12091,7 +12155,7 @@ var _user$project$Main$update = F2(
 					var $new = A2(
 						_elm_lang$core$Maybe$withDefault,
 						_user$project$Request_Static$endpoint(model.$static),
-						A2(_elm_lang$core$Dict$get, _p20._0, _user$project$Main$regions));
+						A2(_elm_lang$core$Dict$get, _p21._0, _user$project$Main$regions));
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
@@ -12106,24 +12170,36 @@ var _user$project$Main$update = F2(
 							_user$project$Request_Static$getLanguages(model.$static))
 					};
 				case 'NewLanguage':
-					var _p21 = _p20._0;
+					var _p22 = _p21._0;
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{currentLanguage: _p22}),
+						_1: A3(
+							_elm_lang$core$Task$perform,
+							_user$project$Main$Fail,
+							_user$project$Main$NewLanguageStrings,
+							A2(_user$project$Request_Static$getLanguageStrings, model.$static, _p22))
+					};
+				case 'NewLanguageStrings':
 					return A3(
 						_user$project$Main$load,
 						_user$project$Main$Init,
-						A2(_user$project$Request_Static$getAllChampionsLoc, _p21, model.$static),
+						A2(_user$project$Request_Static$getAllChampionsLoc, model.currentLanguage, model.$static),
 						_elm_lang$core$Native_Utils.update(
 							model,
-							{currentLanguage: _p21}));
+							{languageStrings: _p21._0}));
 				case 'InitLanguages':
-					var _p22 = _p20._0;
+					var _p23 = _p21._0;
 					var _v11 = _user$project$Main$NewLanguage(
 						A2(
 							_elm_lang$core$Maybe$withDefault,
 							'en_US',
-							_elm_lang$core$List$head(_p22))),
+							_elm_lang$core$List$head(_p23))),
 						_v12 = _elm_lang$core$Native_Utils.update(
 						model,
-						{languages: _p22});
+						{languages: _p23});
 					message = _v11;
 					model = _v12;
 					continue update;
@@ -12134,7 +12210,7 @@ var _user$project$Main$update = F2(
 						A2(
 							_elm_lang$core$Result$withDefault,
 							'',
-							_user$project$Champion$key(model.champion)));
+							_user$project$Champion$key(model.currentChampion)));
 					if (!_elm_lang$core$Native_Utils.eq(key, '')) {
 						var _v13 = _user$project$Main$Search(key),
 							_v14 = model;
@@ -12145,7 +12221,7 @@ var _user$project$Main$update = F2(
 						return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 					}
 				default:
-					var _v15 = _p20._0,
+					var _v15 = _p21._0,
 						_v16 = _elm_lang$core$Native_Utils.update(
 						model,
 						{loading: false});
@@ -12155,9 +12231,13 @@ var _user$project$Main$update = F2(
 			}
 		}
 	});
-var _user$project$Main$viewChampionSelect = function (_p23) {
-	var _p24 = _p23;
-	var _p29 = _p24.all;
+var _user$project$Main$viewChampionSelect = function (_p24) {
+	var _p25 = _p24;
+	var _p30 = _p25.all;
+	var prompt = A2(
+		_elm_lang$core$Maybe$withDefault,
+		'Select a Champion:',
+		A2(_elm_lang$core$Dict$get, 'categoryChampion', _p25.languageStrings));
 	var isSelected = F2(
 		function (x, y) {
 			return _elm_lang$core$Native_Utils.eq(x, y);
@@ -12165,11 +12245,11 @@ var _user$project$Main$viewChampionSelect = function (_p23) {
 		A2(
 			_elm_lang$core$Result$withDefault,
 			'',
-			_user$project$Champion$key(_p24.champion)));
+			_user$project$Champion$key(_p25.currentChampion)));
 	var data = A2(
 		_elm_lang$core$Result$withDefault,
 		_elm_lang$core$Dict$empty,
-		_user$project$ChampionList$data(_p29));
+		_user$project$ChampionList$data(_p30));
 	var keyToName = function (k) {
 		return A2(
 			_elm_lang$core$Maybe$withDefault,
@@ -12177,16 +12257,16 @@ var _user$project$Main$viewChampionSelect = function (_p23) {
 			A2(
 				_elm_lang$core$Maybe$andThen,
 				A2(_elm_lang$core$Dict$get, k, data),
-				function (_p25) {
+				function (_p26) {
 					return _elm_lang$core$Result$toMaybe(
-						_user$project$Champion$name(_p25));
+						_user$project$Champion$name(_p26));
 				}));
 	};
 	var keys = _elm_lang$core$Dict$values(
 		A2(
 			_elm_lang$core$Result$withDefault,
 			_elm_lang$core$Dict$empty,
-			_user$project$ChampionList$keys(_p29)));
+			_user$project$ChampionList$keys(_p30)));
 	return A2(
 		_elm_lang$html$Html$select,
 		_elm_lang$core$Native_List.fromArray(
@@ -12209,25 +12289,25 @@ var _user$project$Main$viewChampionSelect = function (_p23) {
 						]),
 					_elm_lang$core$Native_List.fromArray(
 						[
-							_elm_lang$html$Html$text('Select a Champion:')
+							_elm_lang$html$Html$text(prompt)
 						]))
 				]),
 			A2(
 				_elm_lang$core$List$map,
-				function (_p26) {
-					var _p27 = _p26;
-					var _p28 = _p27._0;
+				function (_p27) {
+					var _p28 = _p27;
+					var _p29 = _p28._0;
 					return A2(
 						_elm_lang$html$Html$option,
 						_elm_lang$core$Native_List.fromArray(
 							[
 								_elm_lang$html$Html_Attributes$selected(
-								isSelected(_p28)),
-								_elm_lang$html$Html_Attributes$value(_p28)
+								isSelected(_p29)),
+								_elm_lang$html$Html_Attributes$value(_p29)
 							]),
 						_elm_lang$core$Native_List.fromArray(
 							[
-								_elm_lang$html$Html$text(_p27._1)
+								_elm_lang$html$Html$text(_p28._1)
 							]));
 				},
 				A2(
@@ -12239,14 +12319,14 @@ var _user$project$Main$viewChampionSelect = function (_p23) {
 						A2(_elm_lang$core$List$map, keyToName, keys))))));
 };
 var _user$project$Main$Validate = {ctor: 'Validate'};
-var _user$project$Main$init = function (_p30) {
-	var _p31 = _p30;
+var _user$project$Main$init = function (_p31) {
+	var _p32 = _p31;
 	return A2(
 		_user$project$Main$update,
 		_user$project$Main$Validate,
 		{
-			$static: A2(_user$project$Request_Static$new, _user$project$Main$defaultRegion, _p31.key),
-			champion: _user$project$Champion$empty,
+			$static: A2(_user$project$Request_Static$new, _user$project$Main$defaultRegion, _p32.key),
+			currentChampion: _user$project$Champion$empty,
 			all: _user$project$ChampionList$empty,
 			full: false,
 			realm: _user$project$Realm$empty,
@@ -12254,7 +12334,8 @@ var _user$project$Main$init = function (_p30) {
 			languages: _elm_lang$core$Native_List.fromArray(
 				[]),
 			currentLanguage: '',
-			loading: false
+			loading: false,
+			languageStrings: _elm_lang$core$Dict$empty
 		});
 };
 var _user$project$Main$NewKey = function (a) {
@@ -12289,24 +12370,29 @@ var _user$project$Main$viewKeyInput = A2(
 					_elm_lang$html$Html$text('submit')
 				]))
 		]));
-var _user$project$Main$view = function (_p32) {
-	var _p33 = _p32;
+var _user$project$Main$view = function (_p33) {
 	var _p34 = _p33;
-	return _p33.loading ? _elm_lang$html$Html$text('Loading...') : A2(
+	var _p36 = _p34;
+	var _p35 = _p34.languageStrings;
+	return _p34.loading ? _elm_lang$html$Html$text(
+		A2(
+			_elm_lang$core$Maybe$withDefault,
+			'Loading...',
+			A2(_elm_lang$core$Dict$get, 'mobilePleaseWait', _p35))) : A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
 			[]),
 		_elm_lang$core$Native_List.fromArray(
 			[
-				_user$project$ChampionList$isEmpty(_p33.all) ? _user$project$Main$viewKeyInput : A2(
+				_user$project$ChampionList$isEmpty(_p34.all) ? _user$project$Main$viewKeyInput : A2(
 				_elm_lang$html$Html$span,
 				_elm_lang$core$Native_List.fromArray(
 					[]),
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_user$project$Main$viewChampionSelect(_p34),
-						_user$project$Main$viewRegionSelect(_p34),
-						_user$project$Main$viewLanguageSelect(_p34),
+						_user$project$Main$viewChampionSelect(_p36),
+						_user$project$Main$viewRegionSelect(_p36),
+						_user$project$Main$viewLanguageSelect(_p36),
 						A2(
 						_elm_lang$html$Html$button,
 						_elm_lang$core$Native_List.fromArray(
@@ -12315,7 +12401,11 @@ var _user$project$Main$view = function (_p32) {
 							]),
 						_elm_lang$core$Native_List.fromArray(
 							[
-								_elm_lang$html$Html$text('previous skin')
+								_elm_lang$html$Html$text(
+								A2(
+									_elm_lang$core$Maybe$withDefault,
+									'previous skin',
+									A2(_elm_lang$core$Dict$get, 'Back', _p35)))
 							])),
 						A2(
 						_elm_lang$html$Html$button,
@@ -12325,7 +12415,11 @@ var _user$project$Main$view = function (_p32) {
 							]),
 						_elm_lang$core$Native_List.fromArray(
 							[
-								_elm_lang$html$Html$text('nextSkin')
+								_elm_lang$html$Html$text(
+								A2(
+									_elm_lang$core$Maybe$withDefault,
+									'next skin',
+									A2(_elm_lang$core$Dict$get, 'Continue', _p35)))
 							]))
 					])),
 				A2(
@@ -12334,7 +12428,7 @@ var _user$project$Main$view = function (_p32) {
 					[]),
 				_elm_lang$core$Native_List.fromArray(
 					[])),
-				_user$project$Main$viewChampion(_p34)
+				_user$project$Main$viewChampion(_p36)
 			]));
 };
 var _user$project$Main$main = {
