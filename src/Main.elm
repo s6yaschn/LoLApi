@@ -21,6 +21,7 @@ import List
 import Json.Decode as Json
 import Skin
 import String
+import Stats
 
 
 type alias Flags =
@@ -260,6 +261,7 @@ viewKeyInput =
             [ type' "text"
             , placeholder "enter API key"
             , onInput NewKey
+            , size 40
             ]
             []
         , input [ type' "submit" ] [ text "submit" ]
@@ -320,11 +322,13 @@ viewChampion : Model -> Html Msg
 viewChampion model =
     span []
         [ viewHeading [] model
+        , br [] []
+        , viewStats [ class "left" ] model
         , if model.full then
             viewLore [] model
           else
             viewBlurb [] model
-        , br [] []
+        , br [ class "clear" ] []
         , viewPassive model
         , viewSpells model
         , br [] []
@@ -402,3 +406,89 @@ viewSkin { currentChampion, currentSkin } =
                         Maybe.withDefault Skin.empty (List.Extra.getAt currentSkin skins)
                 in
                     Ok <| Champion.skinSplashArt s currentChampion
+
+
+viewStats : List (Attribute Msg) -> Model -> Html Msg
+viewStats attr { currentChampion, languageStrings } =
+    Result.withDefault (text "") <|
+        andThen (Champion.stats currentChampion) <|
+            \stats ->
+                let
+                    show ( x, y ) =
+                        ( toString x, toString y )
+
+                    ( hp, hpLvl ) =
+                        show (Stats.hp stats)
+
+                    ( ad, adLvl ) =
+                        show (Stats.attackdamage stats)
+
+                    ( speed, speedLvl ) =
+                        show (Stats.attackspeed stats)
+
+                    ms =
+                        toString (Stats.movespeed stats)
+
+                    ( hpreg, hpregLvl ) =
+                        show (Stats.hpregen stats)
+
+                    ( armor, armorLvl ) =
+                        show (Stats.armor stats)
+
+                    ( mr, mrLvl ) =
+                        show (Stats.magicresist stats)
+
+                    ( mana, manaLvl ) =
+                        show (Stats.mana stats)
+
+                    ( manareg, manaregLvl ) =
+                        show (Stats.manaregen stats)
+
+                    translate str =
+                        text <| Maybe.withDefault str (Dict.get str languageStrings)
+
+                    format str1 str2 =
+                        text (str1 ++ " (+" ++ str2 ++ ")")
+                in
+                    Ok <|
+                        table attr
+                            [ tr []
+                                [ th [ colspan 2 ] [ translate "Stats" ]
+                                ]
+                            , tr []
+                                [ td [] [ translate "Health" ]
+                                , td [] [ format hp hpLvl ]
+                                ]
+                            , tr []
+                                [ td [] [ translate "HealthRegen" ]
+                                , td [] [ format hpreg hpregLvl ]
+                                ]
+                            , tr []
+                                [ td [] [ translate "Attack" ]
+                                , td [] [ format ad adLvl ]
+                                ]
+                            , tr []
+                                [ td [] [ translate "AttackSpeed" ]
+                                , td [] [ format speed (speedLvl ++ "%") ]
+                                ]
+                            , tr []
+                                [ td [] [ translate "Armor" ]
+                                , td [] [ format armor armorLvl ]
+                                ]
+                            , tr []
+                                [ td [] [ translate "SpellBlock" ]
+                                , td [] [ format mr mrLvl ]
+                                ]
+                            , tr []
+                                [ td [] [ translate "FlatMovementSpeedMod" ]
+                                , td [] [ text ms ]
+                                ]
+                            , tr []
+                                [ td [] [ translate "Mana" ]
+                                , td [] [ format mana manaLvl ]
+                                ]
+                            , tr []
+                                [ td [] [ translate "ManaRegen" ]
+                                , td [] [ format manareg manaregLvl ]
+                                ]
+                            ]
