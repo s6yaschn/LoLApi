@@ -40,7 +40,7 @@ main =
 
 type alias Model =
     { static : Request.Static.Model
-    , champion : Champion.Model
+    , currentChampion : Champion.Model
     , all : ChampionList.Model
     , full : Bool
     , realm : Realm.Model
@@ -48,21 +48,17 @@ type alias Model =
     , currentLanguage : String
     , languages : List String
     , loading : Bool
+    , languageStrings : Dict String String
     }
-
-
-
--- TODO: clarity
-
-
-endpoints : List Endpoint.Model
-endpoints =
-    [ Endpoint.euw, Endpoint.eune, Endpoint.br, Endpoint.jp ]
 
 
 regions : Dict String Endpoint.Model
 regions =
-    Dict.fromList <| List.Extra.zip (List.map Endpoint.region endpoints) endpoints
+    let
+        endpoints =
+            [ Endpoint.euw, Endpoint.eune, Endpoint.br, Endpoint.jp ]
+    in
+        Dict.fromList <| List.Extra.zip (List.map Endpoint.region endpoints) endpoints
 
 
 defaultRegion : Endpoint.Model
@@ -88,6 +84,7 @@ type Msg
     | NextSkin
     | NewRegion String
     | NewLanguage String
+    | NewLanguageStrings (Dict String String)
     | InitLanguages (List String)
     | Refresh
     | Finish Msg
@@ -110,19 +107,19 @@ update message model =
         Search s ->
             let
                 old =
-                    model.champion
+                    model.currentChampion
 
                 new =
                     Result.toMaybe (ChampionList.data model.all) `Maybe.andThen` Dict.get s
             in
-                ( { model | champion = Maybe.withDefault old new, currentSkin = 0 }, Cmd.none )
+                ( { model | currentChampion = Maybe.withDefault old new, currentSkin = 0 }, Cmd.none )
 
         Fail err ->
             Debug.log (flip String.append "\n" <| String.left 50 <| toString err) <|
                 ( model, Cmd.none )
 
         Succeed champ ->
-            ( { model | champion = champ, currentSkin = 0 }, Cmd.none )
+            ( { model | currentChampion = champ, currentSkin = 0 }, Cmd.none )
 
         Init new ->
             let
@@ -146,7 +143,7 @@ update message model =
                     model.currentSkin
 
                 max =
-                    Result.withDefault 0 <| Result.map List.length (Champion.skins model.champion)
+                    Result.withDefault 0 <| Result.map List.length (Champion.skins model.currentChampion)
             in
                 if old >= max - 1 then
                     ( model, Cmd.none )
@@ -170,8 +167,11 @@ update message model =
             in
                 ( { model | static = Request.Static.updateEndpoint model.static new }, Task.perform Fail InitLanguages <| Request.Static.getLanguages model.static )
 
-        NewLanguage lang ->
-            load Init (Request.Static.getAllChampionsLoc lang model.static) <| { model | currentLanguage = lang }
+        NewLanguage new ->
+            ( { model | currentLanguage = new }, Task.perform Fail NewLanguageStrings <| Request.Static.getLanguageStrings model.static new )
+
+        NewLanguageStrings strings ->
+            load Init (Request.Static.getAllChampionsLoc model.currentLanguage model.static) <| { model | languageStrings = strings }
 
         InitLanguages langs ->
             update (NewLanguage <| Maybe.withDefault "en_US" (List.head langs)) { model | languages = langs }
@@ -179,7 +179,7 @@ update message model =
         Refresh ->
             let
                 key =
-                    Debug.log "Refresh" <| Result.withDefault "" (Champion.key model.champion)
+                    Debug.log "Refresh" <| Result.withDefault "" (Champion.key model.currentChampion)
             in
                 if key /= "" then
                     update (Search key) model
@@ -195,9 +195,9 @@ update message model =
 
 
 view : Model -> Html Msg
-view ({ all, currentLanguage, loading } as model) =
+view ({ all, currentLanguage, loading, languageStrings } as model) =
     if loading then
-        text "Loading..."
+        text <| Maybe.withDefault "Loading..." <| Dict.get "mobilePleaseWait" languageStrings
     else
         div []
             [ if ChampionList.isEmpty all then
@@ -207,8 +207,8 @@ view ({ all, currentLanguage, loading } as model) =
                     [ viewChampionSelect model
                     , viewRegionSelect model
                     , viewLanguageSelect model
-                    , button [ onClick PreviousSkin ] [ text "previous skin" ]
-                    , button [ onClick NextSkin ] [ text "nextSkin" ]
+                    , button [ onClick PreviousSkin ] [ text <| Maybe.withDefault "previous skin" <| Dict.get "Back" languageStrings ]
+                    , button [ onClick NextSkin ] [ text <| Maybe.withDefault "next skin" <| Dict.get "Continue" languageStrings ]
                     ]
             , br [] []
             , viewChampion model
@@ -232,7 +232,7 @@ init : Flags -> ( Model, Cmd Msg )
 init { key } =
     update (Validate)
         { static = Request.Static.new defaultRegion key
-        , champion = Champion.empty
+        , currentChampion = Champion.empty
         , all = ChampionList.empty
         , full = False
         , realm = Realm.empty
@@ -240,6 +240,7 @@ init { key } =
         , languages = []
         , currentLanguage = ""
         , loading = False
+        , languageStrings = Dict.empty
         }
 
 
@@ -266,7 +267,7 @@ viewKeyInput =
 
 
 viewChampionSelect : Model -> Html Msg
-viewChampionSelect { all, champion } =
+viewChampionSelect { all, currentChampion, languageStrings } =
     let
         keys =
             Dict.values <| Result.withDefault Dict.empty <| ChampionList.keys all
@@ -278,10 +279,13 @@ viewChampionSelect { all, champion } =
             Maybe.withDefault k <| (Dict.get k data) `Maybe.andThen` (Result.toMaybe << Champion.name)
 
         isSelected =
-            (==) <| Result.withDefault "" (Champion.key champion)
+            (==) <| Result.withDefault "" (Champion.key currentChampion)
+
+        prompt =
+            Maybe.withDefault "Select a Champion:" (Dict.get "categoryChampion" languageStrings)
     in
         select [ onChange Search, required True ] <|
-            List.append [ option [ value "", selected (isSelected ""), hidden True ] [ text "Select a Champion:" ] ] <|
+            List.append [ option [ value "", selected (isSelected ""), hidden True ] [ text prompt ] ] <|
                 List.map (\( key, name ) -> option [ selected (isSelected key), value key ] [ text name ]) <|
                     List.sortBy snd (List.Extra.zip keys (List.map keyToName keys))
 
@@ -296,12 +300,20 @@ viewRegionSelect { static } =
 
 
 viewLanguageSelect : Model -> Html Msg
-viewLanguageSelect { languages, currentLanguage } =
+viewLanguageSelect { languages, currentLanguage, languageStrings } =
     let
         isSelected =
             (==) currentLanguage
+
+        native l =
+            String.append (l ++ " ") <|
+                Maybe.withDefault "" <|
+                    Maybe.oneOf
+                        [ Dict.get ("native_" ++ l) languageStrings
+                        , Dict.get ("native_" ++ String.left 2 l) languageStrings
+                        ]
     in
-        select [ onChange NewLanguage ] <| List.map (\x -> option [ selected (isSelected x), value x ] [ text x ]) languages
+        select [ onChange NewLanguage ] <| List.map (\x -> option [ selected (isSelected x), value x ] [ text (native x) ]) languages
 
 
 viewChampion : Model -> Html Msg
@@ -316,51 +328,51 @@ viewChampion model =
         , viewPassive model
         , viewSpells model
         , br [] []
-        , viewSkin model
+        , span [ class "fullWidth" ] [ viewSkin model ]
         ]
 
 
 viewHeading : List (Attribute Msg) -> Model -> Html Msg
-viewHeading attr { champion } =
+viewHeading attr { currentChampion } =
     Result.withDefault (text "") <|
-        andThen (Champion.name champion) <|
+        andThen (Champion.name currentChampion) <|
             \name ->
-                andThen (Champion.title champion) <|
+                andThen (Champion.title currentChampion) <|
                     \title ->
                         Ok <|
                             span attr [ h1 [] [ text name ], h3 [] [ text title ] ]
 
 
 viewLore : List (Attribute Msg) -> Model -> Html Msg
-viewLore attr { champion } =
+viewLore attr { currentChampion, languageStrings } =
     Result.withDefault (text "") <|
-        andThen (Champion.loreFormatted champion) <|
+        andThen (Champion.loreFormatted currentChampion) <|
             \lore ->
                 Ok <|
                     span attr
                         [ lore
                         , br [] []
-                        , button [ onClick Blurb ] [ text "hide lore" ]
+                        , button [ onClick Blurb ] [ text <| Maybe.withDefault "lore" (Dict.get "Lore" languageStrings) ]
                         ]
 
 
 viewBlurb : List (Attribute Msg) -> Model -> Html Msg
-viewBlurb attr { champion } =
+viewBlurb attr { currentChampion, languageStrings } =
     Result.withDefault (text "") <|
-        andThen (Champion.blurbFormatted champion) <|
+        andThen (Champion.blurbFormatted currentChampion) <|
             \blurb ->
                 Ok <|
                     span attr
                         [ blurb
                         , br [] []
-                        , button [ onClick Full ] [ text "show full lore" ]
+                        , button [ onClick Full ] [ text <| Maybe.withDefault "lore" (Dict.get "Lore" languageStrings) ]
                         ]
 
 
 viewPassive : Model -> Html Msg
-viewPassive { champion, realm } =
+viewPassive { currentChampion, realm } =
     Result.withDefault (text "") <|
-        andThen (Champion.passive champion) <|
+        andThen (Champion.passive currentChampion) <|
             \passive ->
                 andThen (Passive.description passive) <|
                     \description ->
@@ -373,20 +385,20 @@ viewOneSpell realm spell =
 
 
 viewSpells : Model -> Html Msg
-viewSpells { champion, realm } =
+viewSpells { currentChampion, realm } =
     Result.withDefault (text "") <|
-        andThen (Champion.spells champion) <|
+        andThen (Champion.spells currentChampion) <|
             \spells ->
                 Ok <| span [] <| List.map (viewOneSpell realm) spells
 
 
 viewSkin : Model -> Html Msg
-viewSkin { champion, currentSkin } =
+viewSkin { currentChampion, currentSkin } =
     Result.withDefault (text "") <|
-        andThen (Champion.skins champion) <|
+        andThen (Champion.skins currentChampion) <|
             \skins ->
                 let
                     s =
                         Maybe.withDefault Skin.empty (List.Extra.getAt currentSkin skins)
                 in
-                    Ok <| Champion.skinSplashArt s champion
+                    Ok <| Champion.skinSplashArt s currentChampion
