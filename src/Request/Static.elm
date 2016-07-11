@@ -10,6 +10,9 @@ import Realm
 import ChampionList
 import Task exposing (Task)
 import Dict exposing (Dict)
+import SummonerSpell
+import SummonerSpellList
+
 
 -- CONSTANTS
 
@@ -33,17 +36,25 @@ new : Endpoint.Model -> String -> Model
 new reg key =
     Model <| Static reg key
 
+
 endpoint : Model -> Endpoint.Model
-endpoint (Model {endpoint}) = endpoint
+endpoint (Model { endpoint }) =
+    endpoint
+
 
 updateEndpoint : Model -> Endpoint.Model -> Model
-updateEndpoint (Model model) new = Model {model | endpoint = new } 
+updateEndpoint (Model model) new =
+    Model { model | endpoint = new }
+
+
 
 -- REQUESTS
+
 
 getRealm : Model -> Task Http.Error Realm.Model
 getRealm model =
     request model Realm.decoder "realm"
+
 
 getChampionById : Model -> Int -> Task Http.Error Champion.Model
 getChampionById model id =
@@ -54,20 +65,47 @@ getChampionByIdLoc : String -> Model -> Int -> Task Http.Error Champion.Model
 getChampionByIdLoc lang model id =
     request model Champion.decoder <| "champion/" ++ toString id ++ "?champData=all&locale=" ++ lang
 
+
 getAllChampions : Model -> Task Http.Error ChampionList.Model
 getAllChampions model =
     request model ChampionList.decoder "champion?champData=all"
+
 
 getAllChampionsLoc : String -> Model -> Task Http.Error ChampionList.Model
 getAllChampionsLoc lang model =
     request model ChampionList.decoder <| "champion?champData=all&locale=" ++ lang
 
+
 getLanguages : Model -> Task Http.Error (List String)
-getLanguages model = request model (Json.list Json.string) "languages"
+getLanguages model =
+    request model (Json.list Json.string) "languages"
+
 
 getLanguageStrings : Model -> String -> Task Http.Error (Dict String String)
 getLanguageStrings model lang =
     request model ("data" := Json.dict Json.string) <| "language-strings?locale=" ++ lang
+
+
+getSummonerSpellById : Model -> Int -> Task Http.Error SummonerSpell.Model
+getSummonerSpellById model id =
+    request model SummonerSpell.decoder <| "summoner-spell/" ++ toString id ++ "?spellData=all"
+
+
+getSummonerSpellByIdLoc : String -> Model -> Int -> Task Http.Error SummonerSpell.Model
+getSummonerSpellByIdLoc lang model id =
+    request model SummonerSpell.decoder <| "summoner-spell/" ++ toString id ++ "?spellData=all&locale=" ++ lang
+
+
+getAllSummonerSpells : Model -> Task Http.Error SummonerSpellList.Model
+getAllSummonerSpells model =
+    request model SummonerSpellList.decoder "summoner-spell?spellData=all"
+
+
+getAllSummonerSpellsLoc : String -> Model -> Task Http.Error SummonerSpellList.Model
+getAllSummonerSpellsLoc lang model =
+    request model SummonerSpellList.decoder <| "summoner-spell?spellData=all&locale=" ++ lang
+
+
 
 -- HTTP
 
