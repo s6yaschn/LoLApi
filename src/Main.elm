@@ -22,6 +22,7 @@ import Json.Decode as Json
 import Skin
 import String
 import Stats
+import Recommended
 
 
 type alias Flags =
@@ -50,6 +51,7 @@ type alias Model =
     , languages : List String
     , loading : Bool
     , languageStrings : Dict String String
+    , currentMap : String
     }
 
 
@@ -89,6 +91,7 @@ type Msg
     | InitLanguages (List String)
     | Refresh
     | Finish Msg
+    | NewMap String
 
 
 load : (a -> Msg) -> Task.Task Http.Error a -> Model -> ( Model, Cmd Msg )
@@ -190,6 +193,9 @@ update message model =
         Finish msg ->
             update msg { model | loading = False }
 
+        NewMap new ->
+            ( { model | currentMap = new }, Cmd.none )
+
 
 
 -- VIEW
@@ -242,6 +248,7 @@ init { key } =
         , currentLanguage = ""
         , loading = False
         , languageStrings = Dict.empty
+        , currentMap = ""
         }
 
 
@@ -332,6 +339,8 @@ viewChampion model =
         , viewPassive model
         , viewSpells model
         , br [] []
+        , viewRecommended model
+        , br [] []
         , span [ class "fullWidth" ] [ viewSkin model ]
         ]
 
@@ -406,6 +415,58 @@ viewSkin { currentChampion, currentSkin } =
                         Maybe.withDefault Skin.empty (List.Extra.getAt currentSkin skins)
                 in
                     Ok <| Champion.skinSplashArt s currentChampion
+
+
+viewRecommended : Model -> Html Msg
+viewRecommended { currentChampion, currentMap, languageStrings, realm } =
+    --todo: clean up
+    let
+        isSelected =
+            (==) currentMap
+
+        recs =
+            Debug.log "Recs" <| Result.withDefault [] (Champion.recommended currentChampion)
+
+        maps =
+            List.map (Result.withDefault "" << Recommended.map) recs
+
+        mapId str =
+            case str of
+                "HA" ->
+                    "Map12"
+
+                "TT" ->
+                    "Map10"
+
+                "SR" ->
+                    "Map1"
+
+                "CS" ->
+                    "Map8"
+
+                _ ->
+                    str
+
+        translate str =
+            Maybe.withDefault str (Dict.get (mapId str) languageStrings)
+    in
+        if List.isEmpty recs then
+            text ""
+        else
+            span []
+                [ select [ onChange NewMap ] <|
+                    List.append [ option [ selected (isSelected ""), value "", hidden True ] [ text <| translate "RecommendedItems" ] ] <|
+                        List.map (\x -> option [ selected (isSelected x), value x ] [ text <| translate x ]) maps
+                , br [] []
+                , Recommended.view realm <|
+                    -- todo: translated view
+                    Maybe.withDefault Recommended.empty
+                    <|
+                        Maybe.map snd <|
+                            List.Extra.find (isSelected << fst) <|
+                                List.Extra.zip maps recs
+                  -- todo: remove duplicates
+                ]
 
 
 viewStats : List (Attribute Msg) -> Model -> Html Msg
