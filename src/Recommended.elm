@@ -153,5 +153,5 @@ view realm m =
                                 ++ List.map (Item.icon realm) (Result.withDefault [] (Block.items x))
                 in
                     div [] <|
-                        h1 [] [ text recommended.typ ]
+                        h1 [] [ text recommended.title ]
                             :: List.map f recommended.blocks
