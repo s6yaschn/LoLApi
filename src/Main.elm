@@ -214,11 +214,9 @@ view ({ all, currentLanguage, loading, languageStrings } as model) =
                     [ viewChampionSelect model
                     , viewRegionSelect model
                     , viewLanguageSelect model
-                    , button [ onClick PreviousSkin ] [ text <| Maybe.withDefault "previous skin" <| Dict.get "Back" languageStrings ]
-                    , button [ onClick NextSkin ] [ text <| Maybe.withDefault "next skin" <| Dict.get "Continue" languageStrings ]
+                    , br [] []
+                    , viewChampion model
                     ]
-            , br [] []
-            , viewChampion model
             ]
 
 
@@ -325,6 +323,25 @@ viewLanguageSelect { languages, currentLanguage, languageStrings } =
         select [ onChange NewLanguage ] <| List.map (\x -> option [ selected (isSelected x), value x ] [ text (native x) ]) languages
 
 
+viewSkinSelect : Model -> Html Msg
+viewSkinSelect { currentChampion, languageStrings, currentSkin } =
+    Result.withDefault (text "") <|
+        andThen (Champion.skins currentChampion) <|
+            \skins ->
+                let
+                    s =
+                        Maybe.withDefault Skin.empty (List.Extra.getAt currentSkin skins)
+                in
+                    andThen (Skin.name s) <|
+                        \name ->
+                            Ok <|
+                                span []
+                                    [ h3 [] [ text name ]
+                                    , button [ onClick PreviousSkin ] [ text <| Maybe.withDefault "previous skin" <| Dict.get "Back" languageStrings ]
+                                    , button [ onClick NextSkin ] [ text <| Maybe.withDefault "next skin" <| Dict.get "Continue" languageStrings ]
+                                    ]
+
+
 viewChampion : Model -> Html Msg
 viewChampion model =
     span []
@@ -338,9 +355,11 @@ viewChampion model =
         , br [ class "clear" ] []
         , viewPassive model
         , viewSpells model
-        , br [] []
-        , viewRecommended model
-        , br [] []
+          {- , br [] []
+             , viewRecommended model
+             , br [] []
+          -}
+        , viewSkinSelect model
         , span [ class "fullWidth" ] [ viewSkin model ]
         ]
 
@@ -425,7 +444,7 @@ viewRecommended { currentChampion, currentMap, languageStrings, realm } =
             (==) currentMap
 
         recs =
-            Debug.log "Recs" <| Result.withDefault [] (Champion.recommended currentChampion)
+            Result.withDefault [] (Champion.recommended currentChampion)
 
         maps =
             List.map (Result.withDefault "" << Recommended.map) recs
