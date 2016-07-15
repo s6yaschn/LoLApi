@@ -239,7 +239,7 @@ init { key } =
         { static = Request.Static.new defaultRegion key
         , currentChampion = Champion.empty
         , all = ChampionList.empty
-        , full = False
+        , full = True
         , realm = Realm.empty
         , currentSkin = 0
         , languages = []
@@ -384,7 +384,7 @@ viewLore attr { currentChampion, languageStrings } =
                     span attr
                         [ lore
                         , br [] []
-                        , button [ onClick Blurb ] [ text <| Maybe.withDefault "lore" (Dict.get "Lore" languageStrings) ]
+                          --   , button [ onClick Blurb ] [ text <| Maybe.withDefault "lore" (Dict.get "Lore" languageStrings) ]
                         ]
 
 
@@ -397,7 +397,7 @@ viewBlurb attr { currentChampion, languageStrings } =
                     span attr
                         [ blurb
                         , br [] []
-                        , button [ onClick Full ] [ text <| Maybe.withDefault "lore" (Dict.get "Lore" languageStrings) ]
+                          --   , button [ onClick Full ] [ text <| Maybe.withDefault "lore" (Dict.get "Lore" languageStrings) ]
                         ]
 
 
