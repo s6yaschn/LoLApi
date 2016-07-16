@@ -12751,6 +12751,9 @@ var _user$project$Main$load = F3(
 				task)
 		};
 	});
+var _user$project$Main$Search = function (a) {
+	return {ctor: 'Search', _0: a};
+};
 var _user$project$Main$update = F2(
 	function (message, model) {
 		update:
@@ -12815,14 +12818,17 @@ var _user$project$Main$update = F2(
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				case 'Init':
-					var old = model.all;
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{all: _p41._0}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
+					var key = A2(
+						_elm_lang$core$Result$withDefault,
+						'',
+						_user$project$Champion$key(model.currentChampion));
+					var _v14 = _user$project$Main$Search(key),
+						_v15 = _elm_lang$core$Native_Utils.update(
+						model,
+						{all: _p41._0});
+					message = _v14;
+					model = _v15;
+					continue update;
 				case 'Full':
 					return {
 						ctor: '_Tuple2',
@@ -12841,16 +12847,16 @@ var _user$project$Main$update = F2(
 					};
 				case 'NewRealm':
 					var _p42 = _p41._0;
-					var _v14 = _user$project$Main$NewLanguage(
+					var _v16 = _user$project$Main$NewLanguage(
 						A2(
 							_elm_lang$core$Result$withDefault,
 							'en_US',
 							_user$project$Realm$defaultLanguage(_p42))),
-						_v15 = _elm_lang$core$Native_Utils.update(
+						_v17 = _elm_lang$core$Native_Utils.update(
 						model,
 						{realm: _p42});
-					message = _v14;
-					model = _v15;
+					message = _v16;
+					model = _v17;
 					continue update;
 				case 'NextSkin':
 					var max = A2(
@@ -12928,12 +12934,12 @@ var _user$project$Main$update = F2(
 							_user$project$Request_Static$getRealm(model.$static))
 					};
 				case 'Finish':
-					var _v16 = _p41._0,
-						_v17 = _elm_lang$core$Native_Utils.update(
+					var _v18 = _p41._0,
+						_v19 = _elm_lang$core$Native_Utils.update(
 						model,
 						{loading: false});
-					message = _v16;
-					model = _v17;
+					message = _v18;
+					model = _v19;
 					continue update;
 				default:
 					return {
@@ -12946,9 +12952,6 @@ var _user$project$Main$update = F2(
 			}
 		}
 	});
-var _user$project$Main$Search = function (a) {
-	return {ctor: 'Search', _0: a};
-};
 var _user$project$Main$viewChampionSelect = function (_p44) {
 	var _p45 = _p44;
 	var _p50 = _p45.all;
