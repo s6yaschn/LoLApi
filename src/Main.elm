@@ -58,8 +58,7 @@ type alias Model =
 regions : Dict String Endpoint.Model
 regions =
     let
-        endpoints =
-            [ Endpoint.euw, Endpoint.eune, Endpoint.br, Endpoint.jp ]
+        endpoints = Endpoint.pbe :: Endpoint.all
     in
         Dict.fromList <| List.Extra.zip (List.map Endpoint.region endpoints) endpoints
 
