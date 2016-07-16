@@ -89,7 +89,6 @@ type Msg
     | NewLanguage String
     | NewLanguageStrings (Dict String String)
     | InitLanguages (List String)
-    | Refresh
     | Finish Msg
     | NewMap String
 
@@ -130,7 +129,7 @@ update message model =
                 old =
                     model.all
             in
-                ( { model | all = new }, Task.perform Fail NewRealm <| Request.Static.getRealm model.static )
+                ( { model | all = new },Cmd.none) 
 
         Full ->
             ( { model | full = True }, Cmd.none )
@@ -139,7 +138,7 @@ update message model =
             ( { model | full = False }, Cmd.none )
 
         NewRealm new ->
-            update Refresh { model | realm = new }
+          update (NewLanguage <| Result.withDefault "en_US" <| Realm.defaultLanguage new) {model| realm = new}
 
         NextSkin ->
             let
@@ -168,8 +167,10 @@ update message model =
             let
                 new =
                     Maybe.withDefault (Request.Static.endpoint model.static) (Dict.get regio regions)
+
+                newStatic = Request.Static.updateEndpoint model.static new
             in
-                ( { model | static = Request.Static.updateEndpoint model.static new }, Task.perform Fail InitLanguages <| Request.Static.getLanguages model.static )
+                ( { model | static = newStatic  }, Task.perform Fail InitLanguages <| Request.Static.getLanguages newStatic )
 
         NewLanguage new ->
             ( { model | currentLanguage = new }, Task.perform Fail NewLanguageStrings <| Request.Static.getLanguageStrings model.static new )
@@ -178,17 +179,8 @@ update message model =
             load Init (Request.Static.getAllChampionsLoc model.currentLanguage model.static) <| { model | languageStrings = strings }
 
         InitLanguages langs ->
-            update (NewLanguage <| Maybe.withDefault "en_US" (List.head langs)) { model | languages = langs }
+           ({model| languages = langs}, Task.perform Fail NewRealm <| Request.Static.getRealm model.static)
 
-        Refresh ->
-            let
-                key =
-                    Debug.log "Refresh" <| Result.withDefault "" (Champion.key model.currentChampion)
-            in
-                if key /= "" then
-                    update (Search key) model
-                else
-                    ( model, Cmd.none )
 
         Finish msg ->
             update msg { model | loading = False }

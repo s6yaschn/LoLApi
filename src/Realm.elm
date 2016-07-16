@@ -6,6 +6,7 @@ module Realm
         , decoder
         , cdn
         , version
+        , defaultLanguage
         )
 
 import Json.Decode exposing (..)
@@ -71,6 +72,13 @@ decoder =
 
 
 -- ACCESSORS
+
+defaultLanguage : Model -> Result String String 
+defaultLanguage m =
+    case m of 
+        Empty -> emptyModelError "Realm.defaultLanguage"
+
+        Model {l} -> Ok l
 
 
 cdn : Model -> Result String String
