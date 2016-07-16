@@ -126,10 +126,9 @@ update message model =
 
         Init new ->
             let
-                old =
-                    model.all
+                key = Result.withDefault "" <| Champion.key model.currentChampion
             in
-                ( { model | all = new },Cmd.none) 
+               update (Search key) { model | all = new }
 
         Full ->
             ( { model | full = True }, Cmd.none )
