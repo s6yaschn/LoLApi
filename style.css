@@ -2,14 +2,21 @@
     width: 100%;
 }
 
-.left {
-    float: left;
+.block {
+    display: inline-block; 
+    vertical-align: top;
 }
 
-.right {
-    float: right;
+.container {
+    width: 90%;
+    margin: 0 auto;
 }
 
-.clear {
-    clear: both;
+.centered {
+    margin: 0 auto;
+    width: 330px;
+}
+
+h1, h2, h3 {
+    text-align: center;
 }

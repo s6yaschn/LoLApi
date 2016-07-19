@@ -23,6 +23,7 @@ import Skin
 import String
 import Stats
 import Recommended
+import Window exposing (Size)
 
 
 type alias Flags =
@@ -53,6 +54,7 @@ type alias Model =
     , languageStrings : Dict String String
     , currentMap : String
     , currentRecommended : Recommended.Model
+    , currentSize : Size
     }
 
 
@@ -68,6 +70,16 @@ regions =
 defaultRegion : Endpoint.Model
 defaultRegion =
     Endpoint.euw
+
+
+windowSizeBreakpoint : Int
+windowSizeBreakpoint =
+    800
+
+
+sideBarWidth : Int
+sideBarWidth =
+    350
 
 
 
@@ -93,6 +105,7 @@ type Msg
     | Finish Msg
     | NewMap String
     | NewRecommended String
+    | NewSize Size
 
 
 load : (a -> Msg) -> Task.Task Http.Error a -> Model -> ( Model, Cmd Msg )
@@ -210,13 +223,16 @@ update message model =
             in
                 ( { model | currentRecommended = new }, Cmd.none )
 
+        NewSize new ->
+            ( { model | currentSize = new }, Cmd.none )
+
 
 
 -- VIEW
 
 
 view : Model -> Html Msg
-view ({ all, currentLanguage, loading, languageStrings } as model) =
+view ({ all, currentLanguage, loading, languageStrings, currentChampion } as model) =
     if loading then
         text <| Maybe.withDefault "Loading..." <| Dict.get "mobilePleaseWait" languageStrings
     else
@@ -224,13 +240,15 @@ view ({ all, currentLanguage, loading, languageStrings } as model) =
             [ if ChampionList.isEmpty all then
                 viewKeyInput
               else
-                span []
+                div [ class "centered" ]
                     [ viewChampionSelect model
                     , viewRegionSelect model
                     , viewLanguageSelect model
-                    , br [] []
-                    , viewChampion model
                     ]
+            , if Champion.isEmpty currentChampion then
+                text ""
+              else
+                viewChampion model
             ]
 
 
@@ -240,7 +258,7 @@ view ({ all, currentLanguage, loading, languageStrings } as model) =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    Window.resizes NewSize
 
 
 
@@ -262,6 +280,7 @@ init { key } =
         , languageStrings = Dict.empty
         , currentMap = "SR"
         , currentRecommended = Recommended.empty
+        , currentSize = Size 800 600
         }
 
 
@@ -358,24 +377,55 @@ viewSkinSelect { currentChampion, languageStrings, currentSkin } =
 
 
 viewChampion : Model -> Html Msg
-viewChampion model =
-    span []
-        [ viewHeading [] model
-        , br [] []
-        , viewStats [ class "left" ] model
-        , if model.full then
-            viewLore [] model
-          else
-            viewBlurb [] model
-        , br [ class "clear" ] []
-        , viewPassive model
-        , viewSpells model
-        , br [] []
-        , viewRecommended model
-        , br [] []
-        , viewSkinSelect model
-        , span [ class "fullWidth" ] [ viewSkin model ]
-        ]
+viewChampion ({ currentSize } as model) =
+    let
+        bigWindow =
+            currentSize.width >= windowSizeBreakpoint
+
+        smallWindow =
+            not bigWindow
+
+        left =
+            style <|
+                if bigWindow then
+                    [ ( "width", toString sideBarWidth ++ "px" ) ]
+                else
+                    []
+
+        right =
+            style <|
+                if bigWindow then
+                    [ ( "width", toString (currentSize.width - sideBarWidth - 100) ++ "px" ) ]
+                else
+                    []
+    in
+        div []
+            [ viewHeading [] model
+            , div
+                [ classList
+                    [ ( "block", bigWindow )
+                    , ( "centered", smallWindow )
+                    ]
+                , left
+                ]
+                [ viewStats [] model
+                , br [] []
+                , viewAbilities [] model
+                , viewRecommended model
+                ]
+            , div
+                [ classList
+                    [ ( "block", bigWindow )
+                    , ( "right", bigWindow )
+                    , ( "centered", smallWindow )
+                    ]
+                , right
+                ]
+                [ viewLore [] model
+                , viewSkinSelect model
+                , div [ class "fullWidth" ] [ viewSkin model ]
+                ]
+            ]
 
 
 viewHeading : List (Attribute Msg) -> Model -> Html Msg
@@ -386,7 +436,7 @@ viewHeading attr { currentChampion } =
                 andThen (Champion.title currentChampion) <|
                     \title ->
                         Ok <|
-                            span attr [ h1 [] [ text name ], h3 [] [ text title ] ]
+                            span attr [ h1 [] [ text name ], h2 [] [ text title ] ]
 
 
 viewLore : List (Attribute Msg) -> Model -> Html Msg
@@ -396,23 +446,18 @@ viewLore attr { currentChampion, languageStrings } =
             \lore ->
                 Ok <|
                     span attr
-                        [ lore
-                        , br [] []
-                          --   , button [ onClick Blurb ] [ text <| Maybe.withDefault "lore" (Dict.get "Lore" languageStrings) ]
+                        [ h3 [] [ text <| Maybe.withDefault "Lore" <| Dict.get "Lore" languageStrings ]
+                        , lore
                         ]
 
 
-viewBlurb : List (Attribute Msg) -> Model -> Html Msg
-viewBlurb attr { currentChampion, languageStrings } =
-    Result.withDefault (text "") <|
-        andThen (Champion.blurbFormatted currentChampion) <|
-            \blurb ->
-                Ok <|
-                    span attr
-                        [ blurb
-                        , br [] []
-                          --   , button [ onClick Full ] [ text <| Maybe.withDefault "lore" (Dict.get "Lore" languageStrings) ]
-                        ]
+viewAbilities : List (Attribute Msg) -> Model -> Html Msg
+viewAbilities attr ({ languageStrings } as model) =
+    span attr
+        [ h3 [] [ text <| Maybe.withDefault "Abilities" <| Dict.get "Abilities" languageStrings ]
+        , viewPassive model
+        , viewSpells model
+        ]
 
 
 viewPassive : Model -> Html Msg
@@ -546,44 +591,44 @@ viewStats attr { currentChampion, languageStrings } =
                         text (str1 ++ " (+" ++ str2 ++ ")")
                 in
                     Ok <|
-                        table attr
-                            [ tr []
-                                [ th [ colspan 2 ] [ translate "Stats" ]
-                                ]
-                            , tr []
-                                [ td [] [ translate "Health" ]
-                                , td [] [ format hp hpLvl ]
-                                ]
-                            , tr []
-                                [ td [] [ translate "HealthRegen" ]
-                                , td [] [ format hpreg hpregLvl ]
-                                ]
-                            , tr []
-                                [ td [] [ translate "Attack" ]
-                                , td [] [ format ad adLvl ]
-                                ]
-                            , tr []
-                                [ td [] [ translate "AttackSpeed" ]
-                                , td [] [ format speed (speedLvl ++ "%") ]
-                                ]
-                            , tr []
-                                [ td [] [ translate "Armor" ]
-                                , td [] [ format armor armorLvl ]
-                                ]
-                            , tr []
-                                [ td [] [ translate "SpellBlock" ]
-                                , td [] [ format mr mrLvl ]
-                                ]
-                            , tr []
-                                [ td [] [ translate "FlatMovementSpeedMod" ]
-                                , td [] [ text ms ]
-                                ]
-                            , tr []
-                                [ td [] [ translate "Mana" ]
-                                , td [] [ format mana manaLvl ]
-                                ]
-                            , tr []
-                                [ td [] [ translate "ManaRegen" ]
-                                , td [] [ format manareg manaregLvl ]
+                        span attr <|
+                            [ h3 [] [ translate "Stats" ]
+                            , table []
+                                [ tr []
+                                    [ td [] [ translate "Health" ]
+                                    , td [] [ format hp hpLvl ]
+                                    ]
+                                , tr []
+                                    [ td [] [ translate "HealthRegen" ]
+                                    , td [] [ format hpreg hpregLvl ]
+                                    ]
+                                , tr []
+                                    [ td [] [ translate "Attack" ]
+                                    , td [] [ format ad adLvl ]
+                                    ]
+                                , tr []
+                                    [ td [] [ translate "AttackSpeed" ]
+                                    , td [] [ format speed (speedLvl ++ "%") ]
+                                    ]
+                                , tr []
+                                    [ td [] [ translate "Armor" ]
+                                    , td [] [ format armor armorLvl ]
+                                    ]
+                                , tr []
+                                    [ td [] [ translate "SpellBlock" ]
+                                    , td [] [ format mr mrLvl ]
+                                    ]
+                                , tr []
+                                    [ td [] [ translate "FlatMovementSpeedMod" ]
+                                    , td [] [ text ms ]
+                                    ]
+                                , tr []
+                                    [ td [] [ translate "Mana" ]
+                                    , td [] [ format mana manaLvl ]
+                                    ]
+                                , tr []
+                                    [ td [] [ translate "ManaRegen" ]
+                                    , td [] [ format manareg manaregLvl ]
+                                    ]
                                 ]
                             ]
