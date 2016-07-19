@@ -52,13 +52,15 @@ type alias Model =
     , loading : Bool
     , languageStrings : Dict String String
     , currentMap : String
+    , currentRecommended : Recommended.Model
     }
 
 
 regions : Dict String Endpoint.Model
 regions =
     let
-        endpoints = Endpoint.pbe :: Endpoint.all
+        endpoints =
+            Endpoint.pbe :: Endpoint.all
     in
         Dict.fromList <| List.Extra.zip (List.map Endpoint.region endpoints) endpoints
 
@@ -90,6 +92,7 @@ type Msg
     | InitLanguages (List String)
     | Finish Msg
     | NewMap String
+    | NewRecommended String
 
 
 load : (a -> Msg) -> Task.Task Http.Error a -> Model -> ( Model, Cmd Msg )
@@ -114,7 +117,7 @@ update message model =
                 new =
                     Result.toMaybe (ChampionList.data model.all) `Maybe.andThen` Dict.get s
             in
-                ( { model | currentChampion = Maybe.withDefault old new, currentSkin = 0 }, Cmd.none )
+                update (NewMap model.currentMap) { model | currentChampion = Maybe.withDefault old new, currentSkin = 0 }
 
         Fail err ->
             Debug.log (flip String.append "\n" <| String.left 50 <| toString err) <|
@@ -125,9 +128,10 @@ update message model =
 
         Init new ->
             let
-                key = Result.withDefault "" <| Champion.key model.currentChampion
+                key =
+                    Result.withDefault "" <| Champion.key model.currentChampion
             in
-               update (Search key) { model | all = new }
+                update (Search key) { model | all = new }
 
         Full ->
             ( { model | full = True }, Cmd.none )
@@ -136,7 +140,7 @@ update message model =
             ( { model | full = False }, Cmd.none )
 
         NewRealm new ->
-          update (NewLanguage <| Result.withDefault "en_US" <| Realm.defaultLanguage new) {model| realm = new}
+            update (NewLanguage <| Result.withDefault "en_US" <| Realm.defaultLanguage new) { model | realm = new }
 
         NextSkin ->
             let
@@ -166,9 +170,10 @@ update message model =
                 new =
                     Maybe.withDefault (Request.Static.endpoint model.static) (Dict.get regio regions)
 
-                newStatic = Request.Static.updateEndpoint model.static new
+                newStatic =
+                    Request.Static.updateEndpoint model.static new
             in
-                ( { model | static = newStatic  }, Task.perform Fail InitLanguages <| Request.Static.getLanguages newStatic )
+                ( { model | static = newStatic }, Task.perform Fail InitLanguages <| Request.Static.getLanguages newStatic )
 
         NewLanguage new ->
             ( { model | currentLanguage = new }, Task.perform Fail NewLanguageStrings <| Request.Static.getLanguageStrings model.static new )
@@ -177,14 +182,33 @@ update message model =
             load Init (Request.Static.getAllChampionsLoc model.currentLanguage model.static) <| { model | languageStrings = strings }
 
         InitLanguages langs ->
-           ({model| languages = langs}, Task.perform Fail NewRealm <| Request.Static.getRealm model.static)
-
+            ( { model | languages = langs }, Task.perform Fail NewRealm <| Request.Static.getRealm model.static )
 
         Finish msg ->
             update msg { model | loading = False }
 
         NewMap new ->
-            ( { model | currentMap = new }, Cmd.none )
+            let
+                rec =
+                    Result.withDefault [] <| Champion.recommended model.currentChampion
+
+                index =
+                    Maybe.withDefault -1 <| List.Extra.findIndex ((==) new << Result.withDefault "" << Recommended.map) rec
+            in
+                update (NewRecommended <| toString index) { model | currentMap = new }
+
+        NewRecommended nr ->
+            let
+                rec =
+                    Result.withDefault [] <| Champion.recommended model.currentChampion
+
+                index =
+                    Result.withDefault 0 <| String.toInt nr
+
+                new =
+                    Maybe.withDefault model.currentRecommended <| List.Extra.getAt index rec
+            in
+                ( { model | currentRecommended = new }, Cmd.none )
 
 
 
@@ -196,7 +220,7 @@ view ({ all, currentLanguage, loading, languageStrings } as model) =
     if loading then
         text <| Maybe.withDefault "Loading..." <| Dict.get "mobilePleaseWait" languageStrings
     else
-        div []
+        span []
             [ if ChampionList.isEmpty all then
                 viewKeyInput
               else
@@ -236,7 +260,8 @@ init { key } =
         , currentLanguage = ""
         , loading = False
         , languageStrings = Dict.empty
-        , currentMap = ""
+        , currentMap = "SR"
+        , currentRecommended = Recommended.empty
         }
 
 
@@ -345,10 +370,9 @@ viewChampion model =
         , br [ class "clear" ] []
         , viewPassive model
         , viewSpells model
-          {- , br [] []
-             , viewRecommended model
-             , br [] []
-          -}
+        , br [] []
+        , viewRecommended model
+        , br [] []
         , viewSkinSelect model
         , span [ class "fullWidth" ] [ viewSkin model ]
         ]
@@ -427,17 +451,26 @@ viewSkin { currentChampion, currentSkin } =
 
 
 viewRecommended : Model -> Html Msg
-viewRecommended { currentChampion, currentMap, languageStrings, realm } =
-    --todo: clean up
+viewRecommended { currentChampion, currentMap, languageStrings, realm, currentRecommended } =
     let
-        isSelected =
-            (==) currentMap
-
         recs =
-            Result.withDefault [] (Champion.recommended currentChampion)
+            List.indexedMap (,) <| Result.withDefault [] <| Champion.recommended currentChampion
 
         maps =
-            List.map (Result.withDefault "" << Recommended.map) recs
+            List.Extra.unique <| List.map (Result.withDefault "" << Recommended.map << snd) recs
+
+        modes =
+            List.map (\( x, y ) -> ( x, Result.withDefault "error" <| Recommended.mode y )) <| List.filter ((==) (Ok currentMap) << Recommended.map << snd) recs
+
+        translate def str =
+            Maybe.withDefault def <| Dict.get str languageStrings
+
+        guard : List a -> Html Msg -> Html Msg
+        guard l =
+            if List.isEmpty l then
+                always (text "")
+            else
+                identity
 
         mapId str =
             case str of
@@ -456,25 +489,17 @@ viewRecommended { currentChampion, currentMap, languageStrings, realm } =
                 _ ->
                     str
 
-        translate str =
-            Maybe.withDefault str (Dict.get (mapId str) languageStrings)
+        format str =
+            String.left 1 str ++ String.toLower (String.dropLeft 1 str)
     in
-        if List.isEmpty recs then
-            text ""
-        else
+        guard recs <|
             span []
-                [ select [ onChange NewMap ] <|
-                    List.append [ option [ selected (isSelected ""), value "", hidden True ] [ text <| translate "RecommendedItems" ] ] <|
-                        List.map (\x -> option [ selected (isSelected x), value x ] [ text <| translate x ]) maps
+                [ h3 [] [ text <| translate "Recommended Items" "RecommendedItems" ]
+                , select [ onChange NewMap ] <|
+                    List.map (\x -> option [ value x, selected (x == currentMap) ] [ text <| translate x <| mapId x ]) maps
+                , guard modes <| select [ onChange NewRecommended ] <| List.map (\( x, y ) -> option [ value <| toString x ] [ text <| translate (format y) <| "mode" ++ format y ]) modes
                 , br [] []
-                , Recommended.view realm <|
-                    -- todo: translated view
-                    Maybe.withDefault Recommended.empty
-                    <|
-                        Maybe.map snd <|
-                            List.Extra.find (isSelected << fst) <|
-                                List.Extra.zip maps recs
-                  -- todo: remove duplicates
+                , Recommended.viewLoc realm languageStrings currentRecommended
                 ]
 
 

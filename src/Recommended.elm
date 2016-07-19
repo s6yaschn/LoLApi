@@ -10,6 +10,7 @@ module Recommended
         , title
         , typ'
         , view
+        , viewLoc
         )
 
 import Html exposing (..)
@@ -20,7 +21,7 @@ import Json.Decode exposing (..)
 import List
 import Realm
 import Json.Decode.Extra exposing (..)
-
+import Dict exposing (Dict)
 
 -- MODEL
 
@@ -146,12 +147,33 @@ view realm m =
                 let
                     f : Block.Model -> Html a
                     f x =
-                        div [] <|
-                            [ h3 [] [ text <| Result.withDefault "" (Block.typ' x) ]
-                            , br [] []
+                        span [] <|
+                            [ h4 [] [ text <| Result.withDefault "" (Block.typ' x) ]
                             ]
                                 ++ List.map (Item.icon realm) (Result.withDefault [] (Block.items x))
                 in
-                    div [] <|
-                        h1 [] [ text recommended.title ]
+                    span [] <|
+                        h3 [] [ text recommended.title ]
                             :: List.map f recommended.blocks
+
+viewLoc : Realm.Model -> Dict String String -> Model -> Html a 
+viewLoc realm languageStrings m =
+     case m of
+        Empty ->
+            text ""
+
+        Model recommended ->
+            if Realm.isEmpty realm then
+                text ""
+            else
+                let
+                    translate str = Maybe.withDefault str <| Dict.get ("recommended_" ++ str) languageStrings
+
+                    f : Block.Model -> Html a
+                    f x =
+                        span [] <|
+                            [ h4 [] [ text <| translate <| Result.withDefault "" (Block.typ' x)] 
+                            ]
+                                ++ List.map (Item.icon realm) (Result.withDefault [] (Block.items x))
+                in
+                    span [] <| List.map f recommended.blocks    
