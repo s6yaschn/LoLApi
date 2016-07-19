@@ -11483,6 +11483,24 @@ var _user$project$Endpoint$euw = _user$project$Endpoint$Model(
 	{region: 'euw', platformID: 'euw1', host: 'euw.api.pvp.net'});
 var _user$project$Endpoint$jp = _user$project$Endpoint$Model(
 	{region: 'jp', platformID: 'jp1', host: 'jp.api.pvp.net'});
+var _user$project$Endpoint$kr = _user$project$Endpoint$Model(
+	{region: 'kr', platformID: 'kr', host: 'kr.api.pvp.net'});
+var _user$project$Endpoint$lan = _user$project$Endpoint$Model(
+	{region: 'lan', platformID: 'la1', host: 'lan.api.pvp.net'});
+var _user$project$Endpoint$las = _user$project$Endpoint$Model(
+	{region: 'las', platformID: 'la2', host: 'las.api.pvp.net'});
+var _user$project$Endpoint$na = _user$project$Endpoint$Model(
+	{region: 'na', platformID: 'na1', host: 'na.api.pvp.net'});
+var _user$project$Endpoint$oce = _user$project$Endpoint$Model(
+	{region: 'oce', platformID: 'oc1', host: 'oce.api.pvp.net'});
+var _user$project$Endpoint$tr = _user$project$Endpoint$Model(
+	{region: 'tr', platformID: 'tr1', host: 'tr.api.pvp.net'});
+var _user$project$Endpoint$ru = _user$project$Endpoint$Model(
+	{region: 'ru', platformID: 'ru', host: 'ru.api.pvp.net'});
+var _user$project$Endpoint$all = _elm_lang$core$Native_List.fromArray(
+	[_user$project$Endpoint$br, _user$project$Endpoint$eune, _user$project$Endpoint$euw, _user$project$Endpoint$jp, _user$project$Endpoint$kr, _user$project$Endpoint$lan, _user$project$Endpoint$las, _user$project$Endpoint$na, _user$project$Endpoint$oce, _user$project$Endpoint$tr, _user$project$Endpoint$ru]);
+var _user$project$Endpoint$pbe = _user$project$Endpoint$Model(
+	{region: 'pbe', platformID: 'pbe1', host: 'pbe.api.pvp.net'});
 
 var _user$project$SummonerSpell$key = function (m) {
 	var _p0 = m;
@@ -12337,8 +12355,7 @@ var _user$project$Main$subscriptions = function (model) {
 };
 var _user$project$Main$defaultRegion = _user$project$Endpoint$euw;
 var _user$project$Main$regions = function () {
-	var endpoints = _elm_lang$core$Native_List.fromArray(
-		[_user$project$Endpoint$euw, _user$project$Endpoint$eune, _user$project$Endpoint$br, _user$project$Endpoint$jp]);
+	var endpoints = A2(_elm_lang$core$List_ops['::'], _user$project$Endpoint$pbe, _user$project$Endpoint$all);
 	return _elm_lang$core$Dict$fromList(
 		A2(
 			_elm_community$list_extra$List_Extra$zip,
