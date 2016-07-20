@@ -5,7 +5,7 @@ import ChampionList
 import Passive
 import Spell
 import Realm
-import Request.Static
+import Request.Static 
 import Html exposing (..)
 import Html.Events exposing (..)
 import Html.Attributes exposing (..)
@@ -24,7 +24,7 @@ import String
 import Stats
 import Recommended
 import Window exposing (Size)
-
+import Task.Extra
 
 type alias Flags =
     { key : String
@@ -106,7 +106,7 @@ type Msg
     | NewMap String
     | NewRecommended String
     | NewSize Size
-
+    | InitSize Size
 
 load : (a -> Msg) -> Task.Task Http.Error a -> Model -> ( Model, Cmd Msg )
 load tagger task model =
@@ -226,7 +226,8 @@ update message model =
         NewSize new ->
             ( { model | currentSize = new }, Cmd.none )
 
-
+        InitSize new ->
+            update Validate {model| currentSize = new}
 
 -- VIEW
 
@@ -266,8 +267,7 @@ subscriptions model =
 
 
 init : Flags -> ( Model, Cmd Msg )
-init { key } =
-    update (Validate)
+init { key } = (
         { static = Request.Static.new defaultRegion key
         , currentChampion = Champion.empty
         , all = ChampionList.empty
@@ -281,7 +281,7 @@ init { key } =
         , currentMap = "SR"
         , currentRecommended = Recommended.empty
         , currentSize = Size 800 600
-        }
+        }, Task.Extra.performFailproof InitSize Window.size)
 
 
 
